@@ -1,0 +1,33 @@
+package com.falcon.bursio.repository;
+
+import com.falcon.bursio.entity.StudentProfile;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.awt.print.Pageable;
+import java.util.List;
+import java.util.Optional;
+
+public interface StudentProfileRepository extends JpaRepository<StudentProfile, Long> {
+
+    Optional<StudentProfile> findByUserId(Long userId);
+
+    @Query("""
+                SELECT sp FROM StudentProfile sp
+                WHERE sp.profileComplete = true
+                AND (:universityId IS NULL OR sp.university.id = :universityId)
+                AND (:department IS NULL OR sp.department = :department)
+                AND (:minGpa IS NULL OR sp.gpa >= :minGpa)
+                AND (:minGrade IS NULL OR sp.grade >= :minGrade)
+                AND (:maxGrade IS NULL OR sp.grade <= :maxGrade)
+            """)
+    List<StudentProfile> findByFilters(
+            @Param("universityId") Long universityId,
+            @Param("department") String department,
+            @Param("minGpa") java.math.BigDecimal minGpa,
+            @Param("minGrade") Integer minGrade,
+            @Param("maxGrade") Integer maxGrade,
+            Pageable  pageable
+    );
+}
