@@ -13,4 +13,7 @@ public final class SuccessMessages {
 
     //Match
     public static final String MATCH_REQUEST_NOTIF_SEND_EN = "Match request notification sended.";
+
+    //Report
+    public static final String REPORT_CREATED = "Şikayetiniz alındı. En kısa sürede incelenecektir.";
 }
