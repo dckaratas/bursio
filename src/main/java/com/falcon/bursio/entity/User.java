@@ -41,4 +41,7 @@ public class User extends BaseEntity {
 
     private String verificationToken;
     private LocalDateTime tokenExpiry;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private StudentProfile studentProfile;
 }

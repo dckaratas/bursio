@@ -25,6 +25,10 @@ public final class ErrorMessages {
     public static final String GRADE_CANNOT_EMPTY = "Sınıf boş olamaz.";
     public static final String GRADE_CANNOT_BE_BIGGER_THAN_SIX = "Sınıf en fazla 6 olabilir.";
     public static final String GRADE_CANNOT_BE_SMALLER_THAN_ONE = "Sınıf en az 1 olabilir.";
+
+    //Match Validations
+    public static final String ACTION_CANNOT_EMPTY = "Yanıt boş olamaz.";
+
     // User
     public static final String USER_NOT_FOUND = "Kullanıcı bulunamadı.";
     public static final String ACCOUNT_NOT_ACTIVE = "Hesabınız henüz aktif değil. Lütfen emailinizi doğrulayın.";

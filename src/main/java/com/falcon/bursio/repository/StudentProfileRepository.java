@@ -1,12 +1,12 @@
 package com.falcon.bursio.repository;
 
 import com.falcon.bursio.entity.StudentProfile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.awt.print.Pageable;
-import java.util.List;
 import java.util.Optional;
 
 public interface StudentProfileRepository extends JpaRepository<StudentProfile, Long> {
@@ -22,12 +22,12 @@ public interface StudentProfileRepository extends JpaRepository<StudentProfile, 
                 AND (:minGrade IS NULL OR sp.grade >= :minGrade)
                 AND (:maxGrade IS NULL OR sp.grade <= :maxGrade)
             """)
-    List<StudentProfile> findByFilters(
+    Page<StudentProfile> findByFilters(
             @Param("universityId") Long universityId,
             @Param("department") String department,
             @Param("minGpa") java.math.BigDecimal minGpa,
             @Param("minGrade") Integer minGrade,
             @Param("maxGrade") Integer maxGrade,
-            Pageable  pageable
+            Pageable pageable
     );
 }

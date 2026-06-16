@@ -2,16 +2,17 @@ package com.falcon.bursio.repository;
 
 import com.falcon.bursio.entity.MatchRequest;
 import com.falcon.bursio.entity.enums.MatchStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface MatchRequestRepository extends JpaRepository<MatchRequest, Long> {
 
-    List<MatchRequest> findByStudentIdOrderByCreatedAtDesc(Long studentId);
+    Page<MatchRequest> findByStudentIdOrderByCreatedAtDesc(Long studentId, Pageable pageable);
 
-    List<MatchRequest> findByDonorIdOrderByCreatedAtDesc(Long donorId);
+    Page<MatchRequest> findByDonorIdOrderByCreatedAtDesc(Long donorId, Pageable pageable);
 
     Optional<MatchRequest> findByIdAndStudentId(Long id, Long studentId);
 

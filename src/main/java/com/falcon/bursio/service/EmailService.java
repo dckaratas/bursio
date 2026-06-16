@@ -19,4 +19,10 @@ public class EmailService {
         // TODO: SendGrid entegrasyonu eklenecek
         log.info("{}: {} | {}: {}", SuccessMessages.MATCH_REQUEST_NOTIF_SEND_EN, to, AppConstants.STUDENT, studentName);
     }
+
+    public void sendMatchRequestNotification(String to, String donorFirstName, String donorMessage) {
+        // TODO: SendGrid entegrasyonu eklenecek
+        log.info("Eşleşme talebi bildirimi gönderildi: {} | Donor: {} | Mesaj: {}",
+                to, donorFirstName, donorMessage);
+    }
 }
