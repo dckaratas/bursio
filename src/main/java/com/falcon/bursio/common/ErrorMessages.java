@@ -19,7 +19,12 @@ public final class ErrorMessages {
     public static final String LASTNAME_CANNOT_EMPTY = "Soyadı boş olamaz.";
     public static final String ROLE_CANNOT_EMPTY = "Rol boş olamaz.";
 
-
+    //Student profile Validations
+    public static final String UNIVERSITY_CANNOT_EMPTY = "Üniversite boş olamaz.";
+    public static final String DEPARTMENT_CANNOT_EMPTY = "Bölüm boş olamaz.";
+    public static final String GRADE_CANNOT_EMPTY = "Sınıf boş olamaz.";
+    public static final String GRADE_CANNOT_BE_BIGGER_THAN_SIX = "Sınıf en fazla 6 olabilir.";
+    public static final String GRADE_CANNOT_BE_SMALLER_THAN_ONE = "Sınıf en az 1 olabilir.";
     // User
     public static final String USER_NOT_FOUND = "Kullanıcı bulunamadı.";
     public static final String ACCOUNT_NOT_ACTIVE = "Hesabınız henüz aktif değil. Lütfen emailinizi doğrulayın.";
