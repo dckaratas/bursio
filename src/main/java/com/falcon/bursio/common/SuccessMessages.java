@@ -16,4 +16,6 @@ public final class SuccessMessages {
 
     //Report
     public static final String REPORT_CREATED = "Şikayetiniz alındı. En kısa sürede incelenecektir.";
+
+    public static final String UNIVERSITY_ADDED = "Üniversite başarıyla eklendi.";
 }
