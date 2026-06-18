@@ -2,10 +2,7 @@ package com.falcon.bursio.entity;
 
 import com.falcon.bursio.entity.enums.ContactPreference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -15,6 +12,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "user")
 public class StudentProfile extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)

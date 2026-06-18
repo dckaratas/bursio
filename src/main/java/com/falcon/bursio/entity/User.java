@@ -3,10 +3,7 @@ package com.falcon.bursio.entity;
 import com.falcon.bursio.entity.enums.AccountStatus;
 import com.falcon.bursio.entity.enums.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "studentProfile")
 public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true)

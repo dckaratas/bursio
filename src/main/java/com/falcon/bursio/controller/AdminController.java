@@ -7,6 +7,7 @@ import com.falcon.bursio.dto.response.*;
 import com.falcon.bursio.entity.enums.ReportStatus;
 import com.falcon.bursio.entity.enums.Role;
 import com.falcon.bursio.service.AdminService;
+import com.falcon.bursio.service.UniversityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
 
     private final AdminService adminService;
+    private final UniversityService universityService;
 
     // ── Kullanıcı Yönetimi ───────────────────────────────────────────────────
 
@@ -65,26 +67,26 @@ public class AdminController {
     public ResponseEntity<PageResponse<UniversityResponse>> getAllUniversities(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(adminService.getAllUniversities(page, size));
+        return ResponseEntity.ok(universityService.getAllUniversities(page, size));
     }
 
     @PostMapping("/universities")
     public ResponseEntity<UniversityResponse> addUniversity(
             @Valid @RequestBody AddUniversityRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(adminService.addUniversity(request));
+                .body(universityService.addUniversity(request));
     }
 
     @PostMapping("/universities/{universityId}/domains")
     public ResponseEntity<UniversityResponse> addEmailDomain(
             @PathVariable Long universityId,
             @Valid @RequestBody AddEmailDomainRequest request) {
-        return ResponseEntity.ok(adminService.addEmailDomain(universityId, request));
+        return ResponseEntity.ok(universityService.addEmailDomain(universityId, request));
     }
 
     @PatchMapping("/universities/{universityId}/toggle")
     public ResponseEntity<MessageResponse> toggleUniversityStatus(
             @PathVariable Long universityId) {
-        return ResponseEntity.ok(adminService.toggleUniversityStatus(universityId));
+        return ResponseEntity.ok(universityService.toggleUniversityStatus(universityId));
     }
 }

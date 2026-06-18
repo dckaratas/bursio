@@ -22,8 +22,10 @@ public class StudentProfileService {
 
     @Transactional
     public StudentProfileResponse createOrUpdate(User currentUser, StudentProfileRequest request) {
-        University university = universityRepository.findById(request.universityId())
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.STUDENT_PROFILE_NOT_FOUND));//TODO: hata mesajını değiştir
+        // Üniversiteyi emailden otomatik bul
+        String domain = currentUser.getEmail().substring(currentUser.getEmail().indexOf('@') + 1);
+        University university = universityRepository.findByEmailDomain(domain)
+                .orElse(null); // bulunamazsa null bırak, hata fırlatma
 
         StudentProfile profile = studentProfileRepository
                 .findByUserId(currentUser.getId())
