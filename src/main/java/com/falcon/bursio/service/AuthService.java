@@ -71,7 +71,7 @@ public class AuthService {
             emailService.sendVerificationEmail(user.getEmail(), verificationToken);
         } catch (Exception e) {
             log.error("Email gönderilemedi: {}", user.getEmail(), e);
-            throw new EmailSendException(ErrorMessages.EMAIL_SEND_FAILED);
+            throw new EmailSendException(ErrorMessages.EMAIL_SEND_FAILED_VERIFICATION);
         }
 
         // Email başarıyla gittiyse kaydet
@@ -205,7 +205,7 @@ public class AuthService {
             emailService.sendVerificationEmail(request.newEmail(), newToken);
         } catch (Exception e) {
             log.error("Email gönderilemedi: {}", request.newEmail(), e);
-            throw new EmailSendException(ErrorMessages.EMAIL_SEND_FAILED);
+            throw new EmailSendException(ErrorMessages.EMAIL_SEND_FAILED_VERIFICATION);
         }
 
         userRepository.save(user);

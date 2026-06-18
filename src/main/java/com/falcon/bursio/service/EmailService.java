@@ -1,7 +1,12 @@
 package com.falcon.bursio.service;
 
+import com.falcon.bursio.common.ErrorMessages;
+import com.falcon.bursio.exception.EmailSendException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import sendinblue.ApiClient;
 import sendinblue.ApiException;
@@ -30,6 +35,11 @@ public class EmailService {
     @Value("${app.base-url}")
     private String baseUrl;
 
+    @Retryable(
+            retryFor = { Exception.class },
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 2000, multiplier = 2) // 2sn, 4sn, 8sn
+    )
     public void sendVerificationEmail(String to, String token) {
         String link = baseUrl + "/api/auth/verify-email?token=" + token;
 
@@ -50,8 +60,14 @@ public class EmailService {
                 """.formatted(link);
 
         sendEmail(to, "BursIO - Email Doğrulama", body);
+        log.info("Email gönderildi: {} | Subject: BursIO - Email Doğrulama", to);
     }
 
+    @Retryable(
+            retryFor = { Exception.class },
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 2000, multiplier = 2)
+    )
     public void sendMatchRequestNotification(String to, String donorFirstName, String donorMessage) {
         String body = """
                 <h2>Yeni Bir Burs Talebi Aldınız!</h2>
@@ -68,6 +84,11 @@ public class EmailService {
         sendEmail(to, "BursIO - Yeni Burs Talebi", body);
     }
 
+    @Retryable(
+            retryFor = { Exception.class },
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 2000, multiplier = 2)
+    )
     public void sendMatchAcceptedNotification(String to, String studentName) {
         String body = """
                 <h2>Burs Talebiniz Kabul Edildi!</h2>
@@ -78,6 +99,17 @@ public class EmailService {
         sendEmail(to, "BursIO - Burs Talebiniz Kabul Edildi", body);
     }
 
+    @Recover
+    public void recover(Exception e, String to, String subject, String htmlBody) {
+        log.error("Email gönderilemedi (3 deneme tükendi): {} | Hata: {}", to, e.getMessage());
+        throw new EmailSendException(ErrorMessages.EMAIL_SEND_FAILED);
+    }
+
+    @Retryable(
+            retryFor = { Exception.class },
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 2000, multiplier = 2)
+    )
     private void sendEmail(String to, String subject, String htmlBody) {
         ApiClient client = Configuration.getDefaultApiClient();
         ApiKeyAuth apiKeyAuth = (ApiKeyAuth) client.getAuthentication("api-key");
@@ -86,7 +118,7 @@ public class EmailService {
         TransactionalEmailsApi api = new TransactionalEmailsApi(client);
 
         SendSmtpEmailSender sender = new SendSmtpEmailSender();
-        ;
+
         sender.setEmail(fromEmail);
         sender.setName(fromName);
 
@@ -104,7 +136,8 @@ public class EmailService {
             api.sendTransacEmail(email);
             log.info("Email gönderildi: {} | Subject: {}", to, subject);
         } catch (ApiException e) {
-            log.error("Email gönderilemedi: {} | Hata: {}", to, e.getMessage());
+            log.warn("Email gönderimi başarısız, retry deneniyor: {} | Hata: {}", to, e.getMessage());
+            throw new RuntimeException("Email gönderilemedi: " + e.getMessage());
         }
     }
 }

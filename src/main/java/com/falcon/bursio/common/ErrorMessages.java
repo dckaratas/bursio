@@ -51,10 +51,11 @@ public final class ErrorMessages {
     public static final String ACCESS_DENIED = "Bu işlem için yetkiniz yok.";
 
     // Email
-    public static final String EMAIL_SEND_FAILED = "Doğrulama emaili gönderilemedi. Lütfen email adresinizi kontrol edip tekrar deneyin.";
     public static final String RESEND_COOLDOWN = "Yeni doğrulama emaili göndermek için 3 dakika beklemeniz gerekmektedir.";
     public static final String ACCOUNT_ALREADY_VERIFIED = "Bu hesap zaten doğrulanmış.";
     public static final String RESEND_MAX_REACHED = "Günlük doğrulama email limitine ulaşıldı. Lütfen yarın tekrar deneyin.";
     public static final String EMAIL_CHANGE_NOT_ALLOWED = "Sadece doğrulanmamış hesaplarda email değişikliği yapılabilir.";
     public static final String EMAIL_CHANGE_COOLDOWN = "Email değişikliği için 3 dakika beklemeniz gerekmektedir.";
+    public static final String EMAIL_SEND_FAILED = "Email servisi şu an kullanılamıyor. Lütfen birkaç dakika sonra tekrar deneyin.";
+    public static final String EMAIL_SEND_FAILED_VERIFICATION = "Doğrulama emaili gönderilemedi. Lütfen email adresinizi kontrol edip tekrar deneyin.";
 }
