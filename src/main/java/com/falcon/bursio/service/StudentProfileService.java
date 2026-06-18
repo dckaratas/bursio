@@ -50,6 +50,6 @@ public class StudentProfileService {
                 .findByUserId(currentUser.getId())
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.STUDENT_PROFILE_NOT_FOUND));
 
-        return StudentProfileResponse.from(profile, false);
+        return StudentProfileResponse.from(profile, true);
     }
 }

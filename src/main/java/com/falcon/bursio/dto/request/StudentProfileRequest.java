@@ -2,14 +2,13 @@ package com.falcon.bursio.dto.request;
 
 import com.falcon.bursio.common.ErrorMessages;
 import com.falcon.bursio.entity.enums.ContactPreference;
+import com.falcon.bursio.exception.ValidContactValue;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 
+@ValidContactValue
 public record StudentProfileRequest(
-
-        @NotNull(message = ErrorMessages.UNIVERSITY_CANNOT_EMPTY)
-        Long universityId,
 
         @NotBlank(message = ErrorMessages.DEPARTMENT_CANNOT_EMPTY)
         String department,
@@ -36,5 +35,6 @@ public record StudentProfileRequest(
         ContactPreference contactPreference,
 
         @NotBlank(message = "İletişim bilgisi boş olamaz.")
+        @Size(max = 50, message = "İletişim bilgisi en fazla 50 karakter olabilir.")
         String contactValue
 ) {}

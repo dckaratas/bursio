@@ -42,4 +42,14 @@ public class User extends BaseEntity {
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private StudentProfile studentProfile;
+
+    @Column(nullable = false)
+    private boolean privacyPolicyAccepted = false;
+
+    @Column(nullable = false)
+    private boolean termsAccepted = false;
+
+    private LocalDateTime consentAcceptedAt;
+
+    private LocalDateTime lastVerificationSentAt;
 }

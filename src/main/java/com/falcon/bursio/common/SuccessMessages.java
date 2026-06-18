@@ -10,6 +10,8 @@ public final class SuccessMessages {
 
     //Email
     public static final String VERIFICATION_EMAIL_SEND_EN = "Verification email sended.";
+    public static final String VERIFICATION_RESENT = "Doğrulama emaili tekrar gönderildi. Lütfen gelen kutunuzu kontrol edin.";
+    public static final String EMAIL_CHANGED = "Email adresiniz güncellendi. Lütfen yeni adresinizi doğrulayın.";
 
     //Match
     public static final String MATCH_REQUEST_NOTIF_SEND_EN = "Match request notification sended.";

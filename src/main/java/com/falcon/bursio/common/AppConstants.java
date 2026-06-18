@@ -11,4 +11,7 @@ public final class AppConstants {
 
     public static final String STUDENT_EN = "Student";
     public static final String STUDENT = "Öğrenci";
+
+    public static final long RESEND_VERIFICATION_COOLDOWN_MINUTES = 3; // 3 dakika bekleme
+    public static final int MAX_RESEND_VERIFICATION_COUNT = 5; // günde max 5 kez
 }

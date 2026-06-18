@@ -2,10 +2,7 @@ package com.falcon.bursio.dto.request;
 
 import com.falcon.bursio.common.ErrorMessages;
 import com.falcon.bursio.entity.enums.Role;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public record RegisterRequest(
 
@@ -24,6 +21,12 @@ public record RegisterRequest(
         String lastName,
 
         @NotNull(message = ErrorMessages.ROLE_CANNOT_EMPTY)
-        Role role
+        Role role,
+
+        @AssertTrue(message = "Gizlilik politikasını kabul etmelisiniz.")
+        boolean privacyPolicyAccepted,
+
+        @AssertTrue(message = "Kullanım koşullarını kabul etmelisiniz.")
+        boolean termsAccepted
 ) {
 }

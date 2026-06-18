@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -80,5 +81,10 @@ public class UniversityService {
                         .searchByNameOrCity(query, PageRequest.of(0, size, Sort.by("name")))
                         .map(UniversityResponse::from)
         );
+    }
+
+    public Optional<UniversityResponse> findByDomain(String domain) {
+        return universityRepository.findByEmailDomain(domain)
+                .map(UniversityResponse::from);
     }
 }

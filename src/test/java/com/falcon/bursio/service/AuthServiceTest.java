@@ -35,11 +35,16 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
-    @Mock private UserRepository userRepository;
-    @Mock private UniversityRepository universityRepository;
-    @Mock private PasswordEncoder passwordEncoder;
-    @Mock private JwtService jwtService;
-    @Mock private EmailService emailService;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private UniversityRepository universityRepository;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private JwtService jwtService;
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private AuthService authService;
@@ -56,7 +61,9 @@ class AuthServiceTest {
                 "password123",
                 "Ali",
                 "Kaya",
-                Role.STUDENT
+                Role.STUDENT,
+                true,
+                true
         );
 
         donorRegisterRequest = new RegisterRequest(
@@ -64,7 +71,9 @@ class AuthServiceTest {
                 "password123",
                 "Ahmet",
                 "Yılmaz",
-                Role.DONOR
+                Role.DONOR,
+                true,
+                true
         );
 
         university = University.builder()
@@ -126,7 +135,7 @@ class AuthServiceTest {
     @DisplayName("Geçersiz üniversite emailiyle öğrenci kaydı yapılamamalı")
     void register_student_with_invalid_university_email_throws_exception() {
         RegisterRequest invalidRequest = new RegisterRequest(
-                "test@gmail.com", "password123", "Ali", "Kaya", Role.STUDENT);
+                "test@gmail.com", "password123", "Ali", "Kaya", Role.STUDENT, true, true);
 
         when(userRepository.existsByEmail(invalidRequest.email())).thenReturn(false);
         when(universityRepository.findByEmailDomain("gmail.com")).thenReturn(Optional.empty());

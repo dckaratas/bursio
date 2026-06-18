@@ -91,21 +91,21 @@ public class RateLimitFilter extends OncePerRequestFilter {
                     .build();
         }
 
-        // Auth endpointleri → 10 dakikada 10 istek
+        // Auth endpointleri → 3 dakikada 10 istek
         if (path.startsWith("/api/auth/")) {
             return Bucket.builder()
                     .addLimit(Bandwidth.builder()
                             .capacity(10)
-                            .refillIntervally(10, Duration.ofMinutes(10))
+                            .refillIntervally(10, Duration.ofMinutes(3))
                             .build())
                     .build();
         }
 
-        // Genel endpointler → dakikada 60 istek
+        // Genel endpointler → dakikada 30 istek
         return Bucket.builder()
                 .addLimit(Bandwidth.builder()
                         .capacity(60)
-                        .refillIntervally(60, Duration.ofMinutes(1))
+                        .refillIntervally(30, Duration.ofMinutes(1))
                         .build())
                 .build();
     }

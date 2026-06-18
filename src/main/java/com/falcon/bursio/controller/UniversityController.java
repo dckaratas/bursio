@@ -30,4 +30,11 @@ public class UniversityController {
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(universityService.searchUniversities(query, size));
     }
+
+    @GetMapping("/by-domain")
+    public ResponseEntity<UniversityResponse> getByDomain(@RequestParam String domain) {
+        return universityService.findByDomain(domain)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

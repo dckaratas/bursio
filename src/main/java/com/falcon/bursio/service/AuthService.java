@@ -1,7 +1,9 @@
 package com.falcon.bursio.service;
 
+import com.falcon.bursio.common.AppConstants;
 import com.falcon.bursio.common.ErrorMessages;
 import com.falcon.bursio.common.SuccessMessages;
+import com.falcon.bursio.dto.request.ChangeEmailRequest;
 import com.falcon.bursio.dto.request.LoginRequest;
 import com.falcon.bursio.dto.request.RegisterRequest;
 import com.falcon.bursio.dto.response.AuthResponse;
@@ -14,6 +16,7 @@ import com.falcon.bursio.repository.UniversityRepository;
 import com.falcon.bursio.repository.UserRepository;
 import com.falcon.bursio.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -34,12 +38,10 @@ public class AuthService {
     @Transactional
     public MessageResponse register(RegisterRequest request) {
 
-        // Email daha önce kayıtlı mı?
         if (userRepository.existsByEmail(request.email())) {
             throw new EmailAlreadyExistsException(ErrorMessages.EMAIL_ALREADY_EXISTS);
         }
 
-        // Öğrenci ise üniversite email kontrolü yap
         if (request.role() == Role.STUDENT) {
             String domain = extractDomain(request.email());
             universityRepository.findByEmailDomain(domain)
@@ -58,11 +60,22 @@ public class AuthService {
                 .status(AccountStatus.PENDING_VERIFICATION)
                 .emailVerified(false)
                 .verificationToken(verificationToken)
-                .tokenExpiry(LocalDateTime.now().plusHours(24))
+                .tokenExpiry(LocalDateTime.now().plusHours(AppConstants.VERIFICATION_TOKEN_EXPIRY_HOURS))
+                .privacyPolicyAccepted(request.privacyPolicyAccepted())
+                .termsAccepted(request.termsAccepted())
+                .consentAcceptedAt(LocalDateTime.now())
                 .build();
 
+        // Önce email göndermeyi dene
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), verificationToken);
+        } catch (Exception e) {
+            log.error("Email gönderilemedi: {}", user.getEmail(), e);
+            throw new EmailSendException(ErrorMessages.EMAIL_SEND_FAILED);
+        }
+
+        // Email başarıyla gittiyse kaydet
         userRepository.save(user);
-        emailService.sendVerificationEmail(user.getEmail(), verificationToken);
 
         return new MessageResponse(SuccessMessages.REGISTER_SUCCESS);
     }
@@ -103,5 +116,99 @@ public class AuthService {
 
     private String extractDomain(String email) {
         return email.substring(email.indexOf('@') + 1);
+    }
+
+    @Transactional
+    public MessageResponse resendVerificationEmail(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND));
+
+        // Zaten doğrulanmış mı?
+        if (user.isEmailVerified()) {
+            throw new ResendVerificationException(ErrorMessages.ACCOUNT_ALREADY_VERIFIED);
+        }
+
+        // 3 dakika cooldown kontrolü
+        if (user.getLastVerificationSentAt() != null) {
+            LocalDateTime cooldownEnd = user.getLastVerificationSentAt()
+                    .plusMinutes(AppConstants.RESEND_VERIFICATION_COOLDOWN_MINUTES);
+            if (LocalDateTime.now().isBefore(cooldownEnd)) {
+                throw new ResendVerificationException(ErrorMessages.RESEND_COOLDOWN);
+            }
+        }
+
+        // Yeni token oluştur
+        String newToken = UUID.randomUUID().toString();
+        user.setVerificationToken(newToken);
+        user.setTokenExpiry(LocalDateTime.now().plusHours(AppConstants.VERIFICATION_TOKEN_EXPIRY_HOURS));
+        user.setLastVerificationSentAt(LocalDateTime.now());
+
+        // Email gönder
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), newToken);
+        } catch (Exception e) {
+            log.error("Doğrulama emaili gönderilemedi: {}", email, e);
+            throw new EmailSendException(ErrorMessages.EMAIL_SEND_FAILED);
+        }
+
+        userRepository.save(user);
+        return new MessageResponse(SuccessMessages.VERIFICATION_RESENT);
+    }
+
+    @Transactional
+    public MessageResponse changeEmail(ChangeEmailRequest request) {
+
+        if (request.currentEmail().equalsIgnoreCase(request.newEmail())) {
+            throw new EmailAlreadyExistsException("Yeni email adresi mevcut adresle aynı olamaz.");
+        }
+
+        User user = userRepository.findByEmail(request.currentEmail())
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND));
+
+        // Sadece doğrulanmamış hesaplarda değişikliğe izin ver
+        if (user.isEmailVerified()) {
+            throw new ResendVerificationException(ErrorMessages.EMAIL_CHANGE_NOT_ALLOWED);
+        }
+
+        // Yeni email zaten kayıtlı mı?
+        if (userRepository.existsByEmail(request.newEmail())) {
+            throw new EmailAlreadyExistsException(ErrorMessages.EMAIL_ALREADY_EXISTS);
+        }
+
+        // Öğrenci ise yeni email domain kontrolü
+        if (user.getRole() == Role.STUDENT) {
+            String domain = extractDomain(request.newEmail());
+            universityRepository.findByEmailDomain(domain)
+                    .orElseThrow(() -> new InvalidUniversityEmailException(
+                            ErrorMessages.INVALID_UNIVERSITY_EMAIL));
+        }
+
+        // Cooldown kontrolü
+        if (user.getLastVerificationSentAt() != null) {
+            LocalDateTime cooldownEnd = user.getLastVerificationSentAt()
+                    .plusMinutes(AppConstants.RESEND_VERIFICATION_COOLDOWN_MINUTES);
+            if (LocalDateTime.now().isBefore(cooldownEnd)) {
+                throw new ResendVerificationException(ErrorMessages.EMAIL_CHANGE_COOLDOWN);
+            }
+        }
+
+        // Email güncelle, yeni token oluştur
+        String newToken = UUID.randomUUID().toString();
+        user.setEmail(request.newEmail());
+        user.setVerificationToken(newToken);
+        user.setTokenExpiry(LocalDateTime.now().plusHours(AppConstants.VERIFICATION_TOKEN_EXPIRY_HOURS));
+        user.setLastVerificationSentAt(LocalDateTime.now());
+
+        // Yeni adrese doğrulama emaili gönder
+        try {
+            emailService.sendVerificationEmail(request.newEmail(), newToken);
+        } catch (Exception e) {
+            log.error("Email gönderilemedi: {}", request.newEmail(), e);
+            throw new EmailSendException(ErrorMessages.EMAIL_SEND_FAILED);
+        }
+
+        userRepository.save(user);
+        return new MessageResponse(SuccessMessages.EMAIL_CHANGED);
     }
 }

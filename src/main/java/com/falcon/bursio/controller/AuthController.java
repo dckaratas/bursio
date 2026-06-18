@@ -1,5 +1,6 @@
 package com.falcon.bursio.controller;
 
+import com.falcon.bursio.dto.request.ChangeEmailRequest;
 import com.falcon.bursio.dto.request.LoginRequest;
 import com.falcon.bursio.dto.request.RegisterRequest;
 import com.falcon.bursio.dto.response.AuthResponse;
@@ -31,5 +32,16 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<MessageResponse> resendVerification(@RequestParam String email) {
+        return ResponseEntity.ok(authService.resendVerificationEmail(email));
+    }
+
+    @PutMapping("/change-email")
+    public ResponseEntity<MessageResponse> changeEmail(
+            @Valid @RequestBody ChangeEmailRequest request) {
+        return ResponseEntity.ok(authService.changeEmail(request));
     }
 }

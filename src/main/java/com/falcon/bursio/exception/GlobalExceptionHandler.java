@@ -66,4 +66,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ErrorResponse.of("INTERNAL_ERROR", ErrorMessages.INTERNAL_ERROR));
     }
+
+    @ExceptionHandler(EmailSendException.class)
+    public ResponseEntity<ErrorResponse> handleEmailSend(EmailSendException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ErrorResponse.of(ex.getCode(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(ResendVerificationException.class)
+    public ResponseEntity<ErrorResponse> handleResendVerification(ResendVerificationException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(ErrorResponse.of(ex.getCode(), ex.getMessage()));
+    }
 }
