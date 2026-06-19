@@ -174,4 +174,18 @@ public class EmailService {
         log.error("Şifre sıfırlama emaili gönderilemedi (3 deneme): {}", to);
         throw new EmailSendException(ErrorMessages.EMAIL_SEND_FAILED);
     }
+
+    @Retryable(
+            retryFor = { Exception.class },
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 2000, multiplier = 2)
+    )
+    public void sendAccountDeletedNotification(String to, String message) {
+        sendEmail(to, "BursIO - Bildirim", message);
+    }
+
+    @Recover
+    public void recoverAccountDeleted(Exception e, String to, String message) {
+        log.error("Hesap silme bildirimi gönderilemedi: {}", to);
+    }
 }

@@ -18,12 +18,23 @@ public record ReportDetailResponse(
         LocalDateTime createdAt
 ) {
     public static ReportDetailResponse from(Report report) {
+        String reporterEmail = report.getReporterEmail() != null
+                ? report.getReporterEmail()
+                : (report.getReporter() != null ? report.getReporter().getEmail() : "Bilinmiyor");
+
+        String reportedUserEmail = report.getReportedUserEmail() != null
+                ? report.getReportedUserEmail()
+                : (report.getReportedUser() != null ? report.getReportedUser().getEmail() : "Bilinmiyor");
+
+        boolean reporterDeleted = report.getReporter() == null;
+        boolean reportedDeleted = report.getReportedUser() == null;
+
         return new ReportDetailResponse(
                 report.getId(),
-                report.getReporter().getId(),
-                report.getReporter().getEmail(),
-                report.getReportedUser().getId(),
-                report.getReportedUser().getEmail(),
+                report.getReporter() != null ? report.getReporter().getId() : null,
+                reporterDeleted ? reporterEmail + " (Silinmiş)" : reporterEmail,
+                report.getReportedUser() != null ? report.getReportedUser().getId() : null,
+                reportedDeleted ? reportedUserEmail + " (Silinmiş)" : reportedUserEmail,
                 report.getReason(),
                 report.getDescription(),
                 report.getReportStatus(),

@@ -32,6 +32,8 @@ public final class ErrorMessages {
     // User
     public static final String USER_NOT_FOUND = "Kullanıcı bulunamadı.";
     public static final String ACCOUNT_NOT_ACTIVE = "Hesabınız henüz aktif değil. Lütfen emailinizi doğrulayın.";
+    public static final String CANNOT_DELETE_ADMIN = "Admin hesabı silinemez.";
+    public static final String INVALID_PASSWORD = "Şifre hatalı.";
 
     // Student
     public static final String STUDENT_PROFILE_NOT_FOUND = "Öğrenci profili bulunamadı.";
