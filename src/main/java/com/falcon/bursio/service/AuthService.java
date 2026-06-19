@@ -3,9 +3,7 @@ package com.falcon.bursio.service;
 import com.falcon.bursio.common.AppConstants;
 import com.falcon.bursio.common.ErrorMessages;
 import com.falcon.bursio.common.SuccessMessages;
-import com.falcon.bursio.dto.request.ChangeEmailRequest;
-import com.falcon.bursio.dto.request.LoginRequest;
-import com.falcon.bursio.dto.request.RegisterRequest;
+import com.falcon.bursio.dto.request.*;
 import com.falcon.bursio.dto.response.AuthResponse;
 import com.falcon.bursio.dto.response.MessageResponse;
 import com.falcon.bursio.entity.User;
@@ -210,5 +208,53 @@ public class AuthService {
 
         userRepository.save(user);
         return new MessageResponse(SuccessMessages.EMAIL_CHANGED);
+    }
+
+    @Transactional
+    public MessageResponse forgotPassword(ForgotPasswordRequest request) {
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND));
+
+        // Cooldown kontrolü
+        if (user.getPasswordResetToken() != null && user.getPasswordResetExpiry() != null) {
+            LocalDateTime cooldownEnd = user.getPasswordResetExpiry()
+                    .minusHours(AppConstants.PASSWORD_RESET_TOKEN_EXPIRY_HOURS)
+                    .plusMinutes(AppConstants.PASSWORD_RESET_COOLDOWN_MINUTES);
+            if (LocalDateTime.now().isBefore(cooldownEnd)) {
+                throw new ResendVerificationException(ErrorMessages.PASSWORD_RESET_COOLDOWN);
+            }
+        }
+
+        String resetToken = UUID.randomUUID().toString();
+        user.setPasswordResetToken(resetToken);
+        user.setPasswordResetExpiry(
+                LocalDateTime.now().plusHours(AppConstants.PASSWORD_RESET_TOKEN_EXPIRY_HOURS));
+
+        try {
+            emailService.sendPasswordResetEmail(user.getEmail(), resetToken);
+        } catch (Exception e) {
+            log.error("Şifre sıfırlama emaili gönderilemedi: {}", user.getEmail(), e);
+            throw new EmailSendException(ErrorMessages.EMAIL_SEND_FAILED);
+        }
+
+        userRepository.save(user);
+        return new MessageResponse(SuccessMessages.PASSWORD_RESET_SENT);
+    }
+
+    @Transactional
+    public MessageResponse resetPassword(ResetPasswordRequest request) {
+        User user = userRepository.findByPasswordResetToken(request.token())
+                .orElseThrow(() -> new InvalidTokenException(ErrorMessages.INVALID_RESET_TOKEN));
+
+        if (user.getPasswordResetExpiry().isBefore(LocalDateTime.now())) {
+            throw new InvalidTokenException(ErrorMessages.INVALID_RESET_TOKEN);
+        }
+
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        user.setPasswordResetToken(null);
+        user.setPasswordResetExpiry(null);
+        userRepository.save(user);
+
+        return new MessageResponse(SuccessMessages.PASSWORD_RESET_SUCCESS);
     }
 }

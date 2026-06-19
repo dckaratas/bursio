@@ -24,6 +24,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'org.flywaydb:flyway-database-postgresql'
+	implementation 'org.springframework.boot:spring-boot-starter-flyway'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8'
 	implementation 'com.sendinblue:sib-api-v3-sdk:7.0.0'
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.5'

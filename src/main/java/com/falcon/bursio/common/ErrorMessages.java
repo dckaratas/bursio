@@ -58,4 +58,8 @@ public final class ErrorMessages {
     public static final String EMAIL_CHANGE_COOLDOWN = "Email değişikliği için 3 dakika beklemeniz gerekmektedir.";
     public static final String EMAIL_SEND_FAILED = "Email servisi şu an kullanılamıyor. Lütfen birkaç dakika sonra tekrar deneyin.";
     public static final String EMAIL_SEND_FAILED_VERIFICATION = "Doğrulama emaili gönderilemedi. Lütfen email adresinizi kontrol edip tekrar deneyin.";
+
+    // Password
+    public static final String INVALID_RESET_TOKEN = "Geçersiz veya süresi dolmuş şifre sıfırlama linki.";
+    public static final String PASSWORD_RESET_COOLDOWN = "Şifre sıfırlama emaili için 3 dakika beklemeniz gerekmektedir.";
 }

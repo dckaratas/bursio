@@ -1,8 +1,6 @@
 package com.falcon.bursio.controller;
 
-import com.falcon.bursio.dto.request.ChangeEmailRequest;
-import com.falcon.bursio.dto.request.LoginRequest;
-import com.falcon.bursio.dto.request.RegisterRequest;
+import com.falcon.bursio.dto.request.*;
 import com.falcon.bursio.dto.response.AuthResponse;
 import com.falcon.bursio.dto.response.MessageResponse;
 import com.falcon.bursio.service.AuthService;
@@ -43,5 +41,17 @@ public class AuthController {
     public ResponseEntity<MessageResponse> changeEmail(
             @Valid @RequestBody ChangeEmailRequest request) {
         return ResponseEntity.ok(authService.changeEmail(request));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<MessageResponse> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(authService.forgotPassword(request));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<MessageResponse> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+        return ResponseEntity.ok(authService.resetPassword(request));
     }
 }

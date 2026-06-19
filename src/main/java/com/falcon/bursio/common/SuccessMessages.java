@@ -20,4 +20,8 @@ public final class SuccessMessages {
     public static final String REPORT_CREATED = "Şikayetiniz alındı. En kısa sürede incelenecektir.";
 
     public static final String UNIVERSITY_ADDED = "Üniversite başarıyla eklendi.";
+
+    //Password
+    public static final String PASSWORD_RESET_SENT = "Şifre sıfırlama linki email adresinize gönderildi.";
+    public static final String PASSWORD_RESET_SUCCESS = "Şifreniz başarıyla güncellendi. Giriş yapabilirsiniz.";
 }

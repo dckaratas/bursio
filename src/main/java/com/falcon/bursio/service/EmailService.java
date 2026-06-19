@@ -35,6 +35,9 @@ public class EmailService {
     @Value("${app.base-url}")
     private String baseUrl;
 
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
     @Retryable(
             retryFor = { Exception.class },
             maxAttempts = 3,
@@ -139,5 +142,36 @@ public class EmailService {
             log.warn("Email gönderimi başarısız, retry deneniyor: {} | Hata: {}", to, e.getMessage());
             throw new RuntimeException("Email gönderilemedi: " + e.getMessage());
         }
+    }
+
+    @Retryable(
+            retryFor = { Exception.class },
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 2000, multiplier = 2)
+    )
+    public void sendPasswordResetEmail(String to, String token) {
+        String link = frontendUrl + "/reset-password?token=" + token;
+        String body = """
+            <h2>Şifre Sıfırlama</h2>
+            <p>Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:</p>
+            <a href="%s" style="
+                background-color: #1E40AF;
+                color: white;
+                padding: 12px 24px;
+                text-decoration: none;
+                border-radius: 6px;
+                display: inline-block;
+                margin: 16px 0;
+            ">Şifremi Sıfırla</a>
+            <p>Bu bağlantı 1 saat geçerlidir.</p>
+            <p>Bu işlemi siz yapmadıysanız emaili görmezden gelebilirsiniz.</p>
+            """.formatted(link);
+        sendEmail(to, "BursIO - Şifre Sıfırlama", body);
+    }
+
+    @Recover
+    public void recoverPasswordReset(Exception e, String to, String token) {
+        log.error("Şifre sıfırlama emaili gönderilemedi (3 deneme): {}", to);
+        throw new EmailSendException(ErrorMessages.EMAIL_SEND_FAILED);
     }
 }
