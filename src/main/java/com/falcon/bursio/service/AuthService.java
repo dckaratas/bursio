@@ -36,9 +36,14 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final EmailService emailService;
+    private final MaintenanceService maintenanceService;
 
     @Transactional
     public MessageResponse register(RegisterRequest request) {
+
+        if (maintenanceService.isActive()) {
+            throw new IllegalStateException(ErrorMessages.MAINTENANCE_MODE);
+        }
 
         if (userRepository.existsByEmail(request.email())) {
             throw new EmailAlreadyExistsException(ErrorMessages.EMAIL_ALREADY_EXISTS);

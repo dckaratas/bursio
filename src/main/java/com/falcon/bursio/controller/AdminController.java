@@ -2,11 +2,13 @@ package com.falcon.bursio.controller;
 
 import com.falcon.bursio.dto.request.AddEmailDomainRequest;
 import com.falcon.bursio.dto.request.AddUniversityRequest;
+import com.falcon.bursio.dto.request.MaintenanceRequest;
 import com.falcon.bursio.dto.request.UpdateUserStatusRequest;
 import com.falcon.bursio.dto.response.*;
 import com.falcon.bursio.entity.enums.ReportStatus;
 import com.falcon.bursio.entity.enums.Role;
 import com.falcon.bursio.service.AdminService;
+import com.falcon.bursio.service.MaintenanceService;
 import com.falcon.bursio.service.UniversityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final UniversityService universityService;
+    private final MaintenanceService maintenanceService;
 
     // ── Kullanıcı Yönetimi ───────────────────────────────────────────────────
 
@@ -88,5 +91,25 @@ public class AdminController {
     public ResponseEntity<MessageResponse> toggleUniversityStatus(
             @PathVariable Long universityId) {
         return ResponseEntity.ok(universityService.toggleUniversityStatus(universityId));
+    }
+
+    // ── Bakım Modu ───────────────────────────────────────────────────────────
+
+    @GetMapping("/maintenance")
+    public ResponseEntity<MaintenanceResponse> getMaintenanceStatus() {
+        return ResponseEntity.ok(new MaintenanceResponse(
+                maintenanceService.isActive(),
+                maintenanceService.getMessage()
+        ));
+    }
+
+    @PutMapping("/maintenance")
+    public ResponseEntity<MaintenanceResponse> setMaintenance(
+            @RequestBody MaintenanceRequest request) {
+        maintenanceService.setMaintenance(request.active(), request.message());
+        return ResponseEntity.ok(new MaintenanceResponse(
+                maintenanceService.isActive(),
+                maintenanceService.getMessage()
+        ));
     }
 }

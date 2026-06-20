@@ -44,6 +44,10 @@ public final class ErrorMessages {
     public static final String INVALID_MATCH_STATE = "Bu eşleşme talebi artık yanıtlanamaz.";
     public static final String DUPLICATE_MATCH = "Bu öğrenciye zaten bekleyen bir talebiniz var.";
 
+    // University
+    public static final String DOMAIN_ALREADY_EXISTS = "Bu email domaini zaten başka bir üniversiteye kayıtlı.";
+    public static final String DOMAIN_ALREADY_IN_UNIVERSITY = "Bu email domaini zaten bu üniversiteye ekli.";
+
     // Report
     public static final String REPORT_NOT_FOUND = "Şikayet bulunamadı.";
     public static final String CANNOT_REPORT_YOURSELF = "Kendinizi şikayet edemezsiniz.";
@@ -51,6 +55,7 @@ public final class ErrorMessages {
     // General
     public static final String INTERNAL_ERROR = "Beklenmeyen bir hata oluştu.";
     public static final String ACCESS_DENIED = "Bu işlem için yetkiniz yok.";
+    public static final String MAINTENANCE_MODE = "Sistem şu anda bakım modundadır. Yeni kayıt geçici olarak kapatılmıştır.";
 
     // Email
     public static final String RESEND_COOLDOWN = "Yeni doğrulama emaili göndermek için 3 dakika beklemeniz gerekmektedir.";

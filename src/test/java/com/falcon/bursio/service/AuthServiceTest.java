@@ -11,12 +11,7 @@ import com.falcon.bursio.entity.University;
 import com.falcon.bursio.entity.User;
 import com.falcon.bursio.entity.enums.AccountStatus;
 import com.falcon.bursio.entity.enums.Role;
-import com.falcon.bursio.exception.EmailAlreadyExistsException;
-import com.falcon.bursio.exception.EmailSendException;
-import com.falcon.bursio.exception.InvalidTokenException;
-import com.falcon.bursio.exception.InvalidUniversityEmailException;
-import com.falcon.bursio.exception.ResendVerificationException;
-import com.falcon.bursio.exception.ResourceNotFoundException;
+import com.falcon.bursio.exception.*;
 import com.falcon.bursio.repository.UniversityRepository;
 import com.falcon.bursio.repository.UserRepository;
 import com.falcon.bursio.security.JwtService;
@@ -36,7 +31,8 @@ import java.time.LocalDateTime;
 import java.util.HexFormat;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -53,6 +49,8 @@ class AuthServiceTest {
     private JwtService jwtService;
     @Mock
     private EmailService emailService;
+    @Mock
+    private MaintenanceService maintenanceService;
 
     @InjectMocks
     private AuthService authService;
@@ -151,6 +149,18 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.register(invalidRequest))
                 .isInstanceOf(InvalidUniversityEmailException.class)
                 .hasMessage(ErrorMessages.INVALID_UNIVERSITY_EMAIL);
+
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Bakım modu aktifken kayıt yapılamamalı")
+    void register_during_maintenance_throws_exception() {
+        when(maintenanceService.isActive()).thenReturn(true);
+
+        assertThatThrownBy(() -> authService.register(donorRegisterRequest))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage(ErrorMessages.MAINTENANCE_MODE);
 
         verify(userRepository, never()).save(any());
     }

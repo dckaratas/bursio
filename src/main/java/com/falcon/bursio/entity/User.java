@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = "studentProfile")
+@EqualsAndHashCode(callSuper = true)
 public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true)
@@ -32,7 +33,6 @@ public class User extends BaseEntity {
 
     private String firstName;
     private String lastName;
-    private String phone;
 
     @Column(nullable = false)
     private boolean emailVerified = false;

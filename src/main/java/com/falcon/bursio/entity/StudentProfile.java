@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = "user")
+@EqualsAndHashCode(callSuper = true)
 public class StudentProfile extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -38,9 +39,6 @@ public class StudentProfile extends BaseEntity {
     private ContactPreference contactPreference;
 
     private String contactValue;
-
-    @Column(nullable = false)
-    private boolean contactVisible = false;
 
     @Column(nullable = false)
     private boolean profileComplete = false;

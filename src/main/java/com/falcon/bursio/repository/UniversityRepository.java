@@ -14,6 +14,9 @@ public interface UniversityRepository extends JpaRepository<University, Long> {
     @Query("SELECT u FROM University u JOIN u.emailDomains d WHERE d = :domain AND u.active = true")
     Optional<University> findByEmailDomain(@Param("domain") String domain);
 
+    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM University u JOIN u.emailDomains d WHERE d = :domain")
+    boolean existsByEmailDomain(@Param("domain") String domain);
+
     @Query("SELECT u FROM University u WHERE u.active = true AND " +
             "(LOWER(u.name) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
             "LOWER(u.city) LIKE LOWER(CONCAT('%', :query, '%')))")

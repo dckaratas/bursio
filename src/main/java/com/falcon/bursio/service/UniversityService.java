@@ -35,6 +35,13 @@ public class UniversityService {
 
     @Transactional
     public UniversityResponse addUniversity(AddUniversityRequest request) {
+        for (String domain : request.emailDomains()) {
+            if (universityRepository.existsByEmailDomain(domain)) {
+                throw new IllegalArgumentException(
+                        "'" + domain + "' " + ErrorMessages.DOMAIN_ALREADY_EXISTS);
+            }
+        }
+
         University university = University.builder()
                 .name(request.name())
                 .city(request.city())
@@ -51,11 +58,17 @@ public class UniversityService {
         University university = universityRepository.findById(universityId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.STUDENT_PROFILE_NOT_FOUND));
 
-        if (!university.getEmailDomains().contains(request.domain())) {
-            university.getEmailDomains().add(request.domain());
-            universityRepository.save(university);
+        if (university.getEmailDomains().contains(request.domain())) {
+            throw new IllegalArgumentException(ErrorMessages.DOMAIN_ALREADY_IN_UNIVERSITY);
         }
 
+        if (universityRepository.existsByEmailDomain(request.domain())) {
+            throw new IllegalArgumentException(
+                    "'" + request.domain() + "' " + ErrorMessages.DOMAIN_ALREADY_EXISTS);
+        }
+
+        university.getEmailDomains().add(request.domain());
+        universityRepository.save(university);
         return UniversityResponse.from(university);
     }
 

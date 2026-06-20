@@ -23,11 +23,11 @@ public interface MatchRequestRepository extends JpaRepository<MatchRequest, Long
 
     boolean existsByDonorIdAndStudentIdAndStatus(Long donorId, Long studentId, MatchStatus status);
 
-    @Query("SELECT m FROM MatchRequest m WHERE m.status = 'PENDING' AND m.expiresAt < :now")
+    @Query("SELECT m FROM MatchRequest m WHERE m.status = com.falcon.bursio.entity.enums.MatchStatus.PENDING AND m.expiresAt < :now")
     List<MatchRequest> findExpiredMatches(@Param("now") LocalDateTime now);
 
     @Query("SELECT m FROM MatchRequest m WHERE " +
-            "(m.donor.id = :userId OR m.student.id = :userId) AND m.status = 'PENDING'")
+            "(m.donor.id = :userId OR m.student.id = :userId) AND m.status = com.falcon.bursio.entity.enums.MatchStatus.PENDING")
     List<MatchRequest> findPendingMatchesByUserId(@Param("userId") Long userId);
 
     @Modifying
