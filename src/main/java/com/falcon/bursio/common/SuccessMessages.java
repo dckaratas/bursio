@@ -24,6 +24,7 @@ public final class SuccessMessages {
     //Password
     public static final String PASSWORD_RESET_SENT = "Şifre sıfırlama linki email adresinize gönderildi.";
     public static final String PASSWORD_RESET_SUCCESS = "Şifreniz başarıyla güncellendi. Giriş yapabilirsiniz.";
+    public static final String PASSWORD_CHANGED = "Şifreniz başarıyla güncellendi.";
 
     //User
     public static final String ACCOUNT_DELETED = "Hesabınız başarıyla silindi.";

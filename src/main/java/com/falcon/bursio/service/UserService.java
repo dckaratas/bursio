@@ -2,6 +2,7 @@ package com.falcon.bursio.service;
 
 import com.falcon.bursio.common.ErrorMessages;
 import com.falcon.bursio.common.SuccessMessages;
+import com.falcon.bursio.dto.request.ChangePasswordRequest;
 import com.falcon.bursio.dto.request.DeleteAccountRequest;
 import com.falcon.bursio.dto.response.MessageResponse;
 import com.falcon.bursio.entity.MatchRequest;
@@ -97,5 +98,22 @@ public class UserService {
         userRepository.delete(currentUser);
 
         return new MessageResponse(SuccessMessages.ACCOUNT_DELETED);
+    }
+
+    @Transactional
+    public MessageResponse changePassword(User currentUser, ChangePasswordRequest request) {
+
+        if (!passwordEncoder.matches(request.currentPassword(), currentUser.getPassword())) {
+            throw new ResourceNotFoundException(ErrorMessages.INVALID_PASSWORD);
+        }
+
+        if (passwordEncoder.matches(request.newPassword(), currentUser.getPassword())) {
+            throw new IllegalArgumentException(ErrorMessages.SAME_PASSWORD);
+        }
+
+        currentUser.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(currentUser);
+
+        return new MessageResponse(SuccessMessages.PASSWORD_CHANGED);
     }
 }

@@ -64,4 +64,5 @@ public final class ErrorMessages {
     // Password
     public static final String INVALID_RESET_TOKEN = "Geçersiz veya süresi dolmuş şifre sıfırlama linki.";
     public static final String PASSWORD_RESET_COOLDOWN = "Şifre sıfırlama emaili için 3 dakika beklemeniz gerekmektedir.";
+    public static final String SAME_PASSWORD = "Yeni şifre mevcut şifreyle aynı olamaz.";
 }

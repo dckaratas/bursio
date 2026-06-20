@@ -1,5 +1,6 @@
 package com.falcon.bursio.controller;
 
+import com.falcon.bursio.dto.request.ChangePasswordRequest;
 import com.falcon.bursio.dto.request.DeleteAccountRequest;
 import com.falcon.bursio.dto.response.MessageResponse;
 import com.falcon.bursio.security.SecurityUtils;
@@ -15,6 +16,13 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+
+    @PutMapping("/password")
+    public ResponseEntity<MessageResponse> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request) {
+        return ResponseEntity.ok(
+                userService.changePassword(SecurityUtils.getCurrentUser(), request));
+    }
 
     @DeleteMapping("/account")
     public ResponseEntity<MessageResponse> deleteAccount(
