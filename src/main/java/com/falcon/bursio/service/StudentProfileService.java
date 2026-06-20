@@ -39,6 +39,7 @@ public class StudentProfileService {
         profile.setMotivation(request.motivation());
         profile.setContactPreference(request.contactPreference());
         profile.setContactValue(request.contactValue());
+        profile.setDepartmentCategory(request.departmentCategory());
         profile.setProfileComplete(true);
 
         studentProfileRepository.save(profile);

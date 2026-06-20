@@ -11,6 +11,7 @@ import com.falcon.bursio.entity.enums.Role;
 import com.falcon.bursio.exception.ResourceNotFoundException;
 import com.falcon.bursio.repository.MatchRequestRepository;
 import com.falcon.bursio.repository.ReportRepository;
+import com.falcon.bursio.repository.StudentProfileRepository;
 import com.falcon.bursio.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +29,7 @@ public class UserService {
     private final MatchRequestRepository matchRequestRepository;
     private final ReportRepository reportRepository;
     private final EmailService emailService;
+    private final StudentProfileRepository studentProfileRepository;
 
     @Transactional
     public MessageResponse deleteAccount(User currentUser, DeleteAccountRequest request) {
@@ -86,6 +88,10 @@ public class UserService {
 
         // Her ikisi de null olan raporları sil
         reportRepository.deleteByReporterIsNullAndReportedUserIsNull();
+
+        // StudentProfile varsa önce sil
+        studentProfileRepository.findByUserId(currentUser.getId())
+                .ifPresent(studentProfileRepository::delete);
 
         // Kullanıcıyı sil
         userRepository.delete(currentUser);

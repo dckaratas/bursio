@@ -4,11 +4,15 @@ import com.falcon.bursio.dto.request.*;
 import com.falcon.bursio.dto.response.AuthResponse;
 import com.falcon.bursio.dto.response.MessageResponse;
 import com.falcon.bursio.service.AuthService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -16,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     @PostMapping("/register")
     public ResponseEntity<MessageResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -23,8 +29,13 @@ public class AuthController {
     }
 
     @GetMapping("/verify-email")
-    public ResponseEntity<MessageResponse> verifyEmail(@RequestParam String token) {
-        return ResponseEntity.ok(authService.verifyEmail(token));
+    public void verifyEmail(@RequestParam String token, HttpServletResponse response) throws IOException {
+        try {
+            authService.verifyEmail(token);
+            response.sendRedirect(frontendUrl + "/verify-email/success");
+        } catch (Exception e) {
+            response.sendRedirect(frontendUrl + "/verify-email/error");
+        }
     }
 
     @PostMapping("/login")

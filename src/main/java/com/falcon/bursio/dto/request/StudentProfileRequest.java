@@ -2,6 +2,7 @@ package com.falcon.bursio.dto.request;
 
 import com.falcon.bursio.common.ErrorMessages;
 import com.falcon.bursio.entity.enums.ContactPreference;
+import com.falcon.bursio.entity.enums.DepartmentCategory;
 import com.falcon.bursio.exception.ValidContactValue;
 import jakarta.validation.constraints.*;
 
@@ -36,5 +37,9 @@ public record StudentProfileRequest(
 
         @NotBlank(message = "İletişim bilgisi boş olamaz.")
         @Size(max = 50, message = "İletişim bilgisi en fazla 50 karakter olabilir.")
-        String contactValue
-) {}
+        String contactValue,
+
+        @NotNull(message = "Bölüm kategorisi boş olamaz.")
+        DepartmentCategory departmentCategory
+) {
+}

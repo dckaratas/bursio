@@ -36,7 +36,7 @@ public class MatchService {
 
         List<StudentProfile> candidates = studentProfileRepository.findByFilters(
                 filter.universityId(),
-                filter.department(),
+                filter.departmentCategory(),
                 filter.minGpa(),
                 filter.minGrade(),
                 filter.maxGrade(),

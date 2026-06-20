@@ -1,6 +1,7 @@
 package com.falcon.bursio.entity;
 
 import com.falcon.bursio.entity.enums.ContactPreference;
+import com.falcon.bursio.entity.enums.DepartmentCategory;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -43,4 +44,7 @@ public class StudentProfile extends BaseEntity {
 
     @Column(nullable = false)
     private boolean profileComplete = false;
+
+    @Enumerated(EnumType.STRING)
+    private DepartmentCategory departmentCategory;
 }

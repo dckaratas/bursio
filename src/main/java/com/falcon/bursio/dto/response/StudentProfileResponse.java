@@ -2,6 +2,7 @@ package com.falcon.bursio.dto.response;
 
 import com.falcon.bursio.entity.StudentProfile;
 import com.falcon.bursio.entity.enums.ContactPreference;
+import com.falcon.bursio.entity.enums.DepartmentCategory;
 
 import java.math.BigDecimal;
 
@@ -18,7 +19,8 @@ public record StudentProfileResponse(
         String bio,
         String motivation,
         ContactPreference contactPreference,
-        String contactValue,        // null gelir, eşleşme olmadan görünmez
+        String contactValue,// null gelir, eşleşme olmadan görünmez
+        DepartmentCategory departmentCategory,
         boolean profileComplete
 ) {
     public static StudentProfileResponse from(StudentProfile sp, boolean showContact) {
@@ -36,6 +38,7 @@ public record StudentProfileResponse(
                 sp.getMotivation(),
                 sp.getContactPreference(),
                 showContact ? sp.getContactValue() : null,
+                sp.getDepartmentCategory(),
                 sp.isProfileComplete()
         );
     }
