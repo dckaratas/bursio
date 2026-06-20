@@ -19,7 +19,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.HexFormat;
 import java.util.UUID;
 
 @Slf4j
@@ -114,6 +118,16 @@ public class AuthService {
 
     private String extractDomain(String email) {
         return email.substring(email.indexOf('@') + 1);
+    }
+
+    private String hashToken(String token) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 bulunamadı", e);
+        }
     }
 
     @Transactional
@@ -226,7 +240,7 @@ public class AuthService {
         }
 
         String resetToken = UUID.randomUUID().toString();
-        user.setPasswordResetToken(resetToken);
+        user.setPasswordResetToken(hashToken(resetToken));
         user.setPasswordResetExpiry(
                 LocalDateTime.now().plusHours(AppConstants.PASSWORD_RESET_TOKEN_EXPIRY_HOURS));
 
@@ -243,7 +257,7 @@ public class AuthService {
 
     @Transactional
     public MessageResponse resetPassword(ResetPasswordRequest request) {
-        User user = userRepository.findByPasswordResetToken(request.token())
+        User user = userRepository.findByPasswordResetToken(hashToken(request.token()))
                 .orElseThrow(() -> new InvalidTokenException(ErrorMessages.INVALID_RESET_TOKEN));
 
         if (user.getPasswordResetExpiry().isBefore(LocalDateTime.now())) {
