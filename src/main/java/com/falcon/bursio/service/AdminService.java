@@ -30,9 +30,12 @@ public class AdminService {
 
     // ── Kullanıcı Yönetimi ───────────────────────────────────────────────────
 
-    public PageResponse<UserSummaryResponse> getAllUsers(int page, int size) {
+    public PageResponse<UserSummaryResponse> getAllUsers(String query, Role role, int page, int size) {
         return PageResponse.from(
-                userRepository.findAll(PageRequest.of(page, size, Sort.by("createdAt").descending()))
+                userRepository.searchUsers(
+                                query,
+                                role,
+                                PageRequest.of(page, size, Sort.by("createdAt").descending()))
                         .map(UserSummaryResponse::from)
         );
     }
@@ -56,16 +59,12 @@ public class AdminService {
 
     // ── Rapor Yönetimi ───────────────────────────────────────────────────────
 
-    public PageResponse<ReportDetailResponse> getReports(ReportStatus status, int page, int size) {
-        if (status != null) {
-            return PageResponse.from(
-                    reportRepository.findByReportStatus(
-                                    status, PageRequest.of(page, size, Sort.by("createdAt").descending()))
-                            .map(ReportDetailResponse::from)
-            );
-        }
+    public PageResponse<ReportDetailResponse> getReports(String query, ReportStatus status, int page, int size) {
         return PageResponse.from(
-                reportRepository.findAll(PageRequest.of(page, size, Sort.by("createdAt").descending()))
+                reportRepository.searchReports(
+                                query,
+                                status,
+                                PageRequest.of(page, size, Sort.by("createdAt").descending()))
                         .map(ReportDetailResponse::from)
         );
     }

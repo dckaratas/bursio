@@ -18,4 +18,15 @@ public interface UniversityRepository extends JpaRepository<University, Long> {
             "(LOWER(u.name) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
             "LOWER(u.city) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<University> searchByNameOrCity(@Param("query") String query, Pageable pageable);
+
+    @Query("""
+                SELECT u FROM University u
+                WHERE (:query IS NULL OR :query = '' OR
+                       LOWER(u.name) LIKE LOWER(CONCAT('%', :query, '%')) OR
+                       LOWER(u.city) LIKE LOWER(CONCAT('%', :query, '%')))
+            """)
+    Page<University> searchUniversities(
+            @Param("query") String query,
+            Pageable pageable
+    );
 }

@@ -83,6 +83,15 @@ public class UniversityService {
         );
     }
 
+    public PageResponse<UniversityResponse> getUniversities(String query, int page, int size) {
+        return PageResponse.from(
+                universityRepository.searchUniversities(
+                                query,
+                                PageRequest.of(page, size, Sort.by("name").ascending()))
+                        .map(UniversityResponse::from)
+        );
+    }
+
     public Optional<UniversityResponse> findByDomain(String domain) {
         return universityRepository.findByEmailDomain(domain)
                 .map(UniversityResponse::from);

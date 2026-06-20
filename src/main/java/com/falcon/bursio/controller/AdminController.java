@@ -28,13 +28,11 @@ public class AdminController {
 
     @GetMapping("/users")
     public ResponseEntity<PageResponse<UserSummaryResponse>> getAllUsers(
+            @RequestParam(required = false) String query,
             @RequestParam(required = false) Role role,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        if (role != null) {
-            return ResponseEntity.ok(adminService.getUsersByRole(role, page, size));
-        }
-        return ResponseEntity.ok(adminService.getAllUsers(page, size));
+        return ResponseEntity.ok(adminService.getAllUsers(query, role, page, size));
     }
 
     @PutMapping("/users/{userId}/status")
@@ -48,10 +46,11 @@ public class AdminController {
 
     @GetMapping("/reports")
     public ResponseEntity<PageResponse<ReportDetailResponse>> getReports(
+            @RequestParam(required = false) String query,
             @RequestParam(required = false) ReportStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(adminService.getReports(status, page, size));
+        return ResponseEntity.ok(adminService.getReports(query, status, page, size));
     }
 
     @PutMapping("/reports/{reportId}/status")
@@ -65,9 +64,10 @@ public class AdminController {
 
     @GetMapping("/universities")
     public ResponseEntity<PageResponse<UniversityResponse>> getAllUniversities(
+            @RequestParam(required = false) String query,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(universityService.getAllUniversities(page, size));
+        return ResponseEntity.ok(universityService.getUniversities(query, page, size));
     }
 
     @PostMapping("/universities")
