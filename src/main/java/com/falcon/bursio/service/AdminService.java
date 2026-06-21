@@ -1,16 +1,12 @@
 package com.falcon.bursio.service;
 
 import com.falcon.bursio.common.ErrorMessages;
-import com.falcon.bursio.dto.request.AddEmailDomainRequest;
-import com.falcon.bursio.dto.request.AddUniversityRequest;
 import com.falcon.bursio.dto.request.UpdateUserStatusRequest;
 import com.falcon.bursio.dto.response.*;
-import com.falcon.bursio.entity.University;
 import com.falcon.bursio.entity.enums.ReportStatus;
 import com.falcon.bursio.entity.enums.Role;
 import com.falcon.bursio.exception.ResourceNotFoundException;
 import com.falcon.bursio.repository.ReportRepository;
-import com.falcon.bursio.repository.UniversityRepository;
 import com.falcon.bursio.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -18,15 +14,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-
 @Service
 @RequiredArgsConstructor
 public class AdminService {
 
     private final UserRepository userRepository;
     private final ReportRepository reportRepository;
-    private final UniversityRepository universityRepository;
 
     // ── Kullanıcı Yönetimi ───────────────────────────────────────────────────
 
