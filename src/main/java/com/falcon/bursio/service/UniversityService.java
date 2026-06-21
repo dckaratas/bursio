@@ -26,6 +26,7 @@ public class UniversityService {
 
     // ── Üniversite Yönetimi ──────────────────────────────────────────────────
 
+    @Transactional(readOnly = true)
     public PageResponse<UniversityResponse> getAllUniversities(int page, int size) {
         return PageResponse.from(
                 universityRepository.findAll(PageRequest.of(page, size, Sort.by("name").ascending()))
@@ -89,6 +90,7 @@ public class UniversityService {
                 : "Üniversite pasif yapıldı.");
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<UniversityResponse> searchUniversities(String query, int size) {
         if (query == null || query.isBlank()) {
             return getAllUniversities(0, size);
@@ -100,6 +102,7 @@ public class UniversityService {
         );
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<UniversityResponse> getUniversities(String query, int page, int size) {
         return PageResponse.from(
                 universityRepository.searchUniversities(
@@ -109,6 +112,7 @@ public class UniversityService {
         );
     }
 
+    @Transactional(readOnly = true)
     public Optional<UniversityResponse> findByDomain(String domain) {
         return universityRepository.findByEmailDomain(domain)
                 .map(UniversityResponse::from);
