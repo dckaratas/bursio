@@ -23,7 +23,7 @@ public class StudentProfileService {
     @Transactional
     public StudentProfileResponse createOrUpdate(User currentUser, StudentProfileRequest request) {
         // Üniversiteyi emailden otomatik bul
-        String domain = currentUser.getEmail().substring(currentUser.getEmail().indexOf('@') + 1);
+        String domain = currentUser.getEmail().substring(currentUser.getEmail().indexOf('@') + 1).toLowerCase();
         University university = universityRepository.findByEmailDomain(domain)
                 .orElse(null); // bulunamazsa null bırak, hata fırlatma
 

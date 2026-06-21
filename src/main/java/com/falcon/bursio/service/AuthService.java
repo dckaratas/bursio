@@ -122,7 +122,7 @@ public class AuthService {
     }
 
     private String extractDomain(String email) {
-        return email.substring(email.indexOf('@') + 1);
+        return email.substring(email.indexOf('@') + 1).toLowerCase();
     }
 
     private String hashToken(String token) {

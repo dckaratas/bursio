@@ -45,7 +45,9 @@ public class UniversityService {
         University university = University.builder()
                 .name(request.name())
                 .city(request.city())
-                .emailDomains(new ArrayList<>(request.emailDomains()))
+                .emailDomains(request.emailDomains().stream()
+                        .map(String::toLowerCase)
+                        .collect(java.util.stream.Collectors.toCollection(ArrayList::new)))
                 .active(true)
                 .build();
 
@@ -58,16 +60,18 @@ public class UniversityService {
         University university = universityRepository.findById(universityId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.UNIVERSITY_NOT_FOUND));
 
-        if (university.getEmailDomains().contains(request.domain())) {
+        String domain = request.domain().toLowerCase();
+
+        if (university.getEmailDomains().contains(domain)) {
             throw new IllegalArgumentException(ErrorMessages.DOMAIN_ALREADY_IN_UNIVERSITY);
         }
 
-        if (universityRepository.existsByEmailDomain(request.domain())) {
+        if (universityRepository.existsByEmailDomain(domain)) {
             throw new IllegalArgumentException(
-                    "'" + request.domain() + "' " + ErrorMessages.DOMAIN_ALREADY_EXISTS);
+                    "'" + domain + "' " + ErrorMessages.DOMAIN_ALREADY_EXISTS);
         }
 
-        university.getEmailDomains().add(request.domain());
+        university.getEmailDomains().add(domain);
         universityRepository.save(university);
         return UniversityResponse.from(university);
     }
