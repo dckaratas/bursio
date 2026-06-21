@@ -99,6 +99,20 @@ class MatchServiceTest {
     }
 
     @Test
+    @DisplayName("minGrade maxGrade'den büyükse IllegalArgumentException fırlatılmalı")
+    void createRandomMatch_invalid_grade_range_throws_exception() {
+        MatchFilterRequest filter = new MatchFilterRequest(
+                null, null, 4, 2, null, null); // minGrade > maxGrade
+
+        assertThatThrownBy(() -> matchService.createRandomMatch(donor, filter))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Minimum sınıf");
+
+        verify(studentProfileRepository, never()).findByFilters(any(), any(), any(), any(), any(), any());
+        verify(matchRequestRepository, never()).save(any());
+    }
+
+    @Test
     @DisplayName("Uygun öğrenci yoksa NoCandidatesFoundException fırlatılmalı")
     void createRandomMatch_no_candidates_throws_exception() {
         MatchFilterRequest filter = new MatchFilterRequest(

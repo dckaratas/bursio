@@ -34,6 +34,11 @@ public class MatchService {
     @Transactional
     public MatchResponse createRandomMatch(User donor, MatchFilterRequest filter) {
 
+        if (filter.minGrade() != null && filter.maxGrade() != null
+                && filter.minGrade() > filter.maxGrade()) {
+            throw new IllegalArgumentException("Minimum sınıf, maksimum sınıftan büyük olamaz.");
+        }
+
         List<StudentProfile> candidates = studentProfileRepository.findByFilters(
                 filter.universityId(),
                 filter.departmentCategory(),
