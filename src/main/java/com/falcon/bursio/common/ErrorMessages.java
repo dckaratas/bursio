@@ -45,6 +45,7 @@ public final class ErrorMessages {
     public static final String DUPLICATE_MATCH = "Bu öğrenciye zaten bekleyen bir talebiniz var.";
 
     // University
+    public static final String UNIVERSITY_NOT_FOUND = "Üniversite bulunamadı.";
     public static final String DOMAIN_ALREADY_EXISTS = "Bu email domaini zaten başka bir üniversiteye kayıtlı.";
     public static final String DOMAIN_ALREADY_IN_UNIVERSITY = "Bu email domaini zaten bu üniversiteye ekli.";
 

@@ -56,7 +56,7 @@ public class UniversityService {
     @Transactional
     public UniversityResponse addEmailDomain(Long universityId, AddEmailDomainRequest request) {
         University university = universityRepository.findById(universityId)
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.STUDENT_PROFILE_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.UNIVERSITY_NOT_FOUND));
 
         if (university.getEmailDomains().contains(request.domain())) {
             throw new IllegalArgumentException(ErrorMessages.DOMAIN_ALREADY_IN_UNIVERSITY);
@@ -75,7 +75,7 @@ public class UniversityService {
     @Transactional
     public MessageResponse toggleUniversityStatus(Long universityId) {
         University university = universityRepository.findById(universityId)
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.STUDENT_PROFILE_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.UNIVERSITY_NOT_FOUND));
 
         university.setActive(!university.isActive());
         universityRepository.save(university);

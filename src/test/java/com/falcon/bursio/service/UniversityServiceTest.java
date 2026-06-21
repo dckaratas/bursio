@@ -130,7 +130,8 @@ class UniversityServiceTest {
 
         assertThatThrownBy(() ->
                 universityService.addEmailDomain(99L, new AddEmailDomainRequest("test.edu.tr")))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage(ErrorMessages.UNIVERSITY_NOT_FOUND);
     }
 
     // ── toggleUniversityStatus ───────────────────────────────────────────────
