@@ -16,7 +16,7 @@ public record UniversityResponse(
                 university.getId(),
                 university.getName(),
                 university.getCity(),
-                university.getEmailDomains(),
+                List.copyOf(university.getEmailDomains()),
                 university.isActive()
         );
     }
