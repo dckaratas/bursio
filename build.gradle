@@ -8,9 +8,8 @@ group = 'com.falcon'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(26)
-	}
+	sourceCompatibility = '25'
+	targetCompatibility = '25'
 }
 
 repositories {
