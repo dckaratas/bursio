@@ -19,7 +19,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<Report> findByReportedUserId(Long reportedUserId);
 
     @Modifying
-    @Query("DELETE FROM Report r WHERE r.reporter IS NULL AND r.reportedUser IS NULL")
+    @Query("DELETE FROM Report r WHERE r.reporter IS NULL AND r.reportedUser IS NULL AND r.reportStatus != com.falcon.bursio.entity.enums.ReportStatus.OPEN")
     void deleteByReporterIsNullAndReportedUserIsNull();
 
     @Query("""

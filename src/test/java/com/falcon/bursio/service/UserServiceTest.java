@@ -183,4 +183,21 @@ class UserServiceTest {
         verify(reportRepository).save(report);
         verify(userRepository).delete(donor);
     }
+
+    @Test
+    @DisplayName("Her iki taraf da hesabını silince orphan rapor cleanup çağrılmalı")
+    void deleteAccount_calls_orphan_cleanup() {
+        DeleteAccountRequest request = new DeleteAccountRequest("currentPass");
+
+        when(passwordEncoder.matches("currentPass", "encodedPassword")).thenReturn(true);
+        when(matchRequestRepository.findPendingMatchesByUserId(any())).thenReturn(List.of());
+        when(reportRepository.findByReporterId(any())).thenReturn(List.of());
+        when(reportRepository.findByReportedUserId(any())).thenReturn(List.of());
+        when(studentProfileRepository.findByUserId(any())).thenReturn(Optional.empty());
+
+        userService.deleteAccount(donor, request);
+
+        // OPEN olmayan orphan raporlar temizlenmeli; OPEN olanlar admin incelemesi için korunur
+        verify(reportRepository).deleteByReporterIsNullAndReportedUserIsNull();
+    }
 }
