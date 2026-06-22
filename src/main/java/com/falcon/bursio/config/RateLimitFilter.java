@@ -57,6 +57,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
             return;
         }
 
+        // Admin kullanıcıları rate limit'ten muaf
+        if (isAdmin(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String key = resolveKey(request, path);
         Bucket bucket = resolveBucket(key, path);
 
@@ -138,6 +144,18 @@ public class RateLimitFilter extends OncePerRequestFilter {
                         .refillIntervally(30, Duration.ofMinutes(1))
                         .build())
                 .build();
+    }
+
+    private boolean isAdmin(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) return false;
+        try {
+            String token = authHeader.substring(7);
+            String role = jwtService.extractClaims(token).get("role", String.class);
+            return "ADMIN".equals(role);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private String getClientIp(HttpServletRequest request) {
