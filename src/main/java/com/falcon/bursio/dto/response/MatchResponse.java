@@ -17,6 +17,7 @@ public record MatchResponse(
         String studentEmail,
         String contactPreference,
         String contactValue,        // sadece ACCEPTED ise dolu gelir
+        String studentMotivation,   // PENDING ve ACCEPTED durumunda dolu gelir
         MatchStatus status,
         String donorMessage,
         LocalDateTime respondedAt,
@@ -25,6 +26,7 @@ public record MatchResponse(
 ) {
     public static MatchResponse from(MatchRequest match) {
         boolean accepted = match.getStatus() == MatchStatus.ACCEPTED;
+        boolean visible = match.getStatus() == MatchStatus.PENDING || accepted;
 
         return new MatchResponse(
                 match.getId(),
@@ -41,6 +43,9 @@ public record MatchResponse(
                         : null,
                 accepted && match.getStudent().getStudentProfile() != null
                         ? match.getStudent().getStudentProfile().getContactValue()
+                        : null,
+                visible && match.getStudent().getStudentProfile() != null
+                        ? match.getStudent().getStudentProfile().getMotivation()
                         : null,
                 match.getStatus(),
                 match.getDonorMessage(),
