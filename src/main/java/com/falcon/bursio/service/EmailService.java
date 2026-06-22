@@ -4,24 +4,21 @@ import com.falcon.bursio.common.ErrorMessages;
 import com.falcon.bursio.exception.EmailSendException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import sendinblue.ApiClient;
-import sendinblue.ApiException;
-import sendinblue.Configuration;
-import sendinblue.auth.ApiKeyAuth;
-import sibApi.TransactionalEmailsApi;
-import sibModel.SendSmtpEmail;
-import sibModel.SendSmtpEmailSender;
-import sibModel.SendSmtpEmailTo;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
 public class EmailService {
+
+    private final RestClient restClient;
 
     @Value("${brevo.api-key}")
     private String apiKey;
@@ -38,10 +35,17 @@ public class EmailService {
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
+    public EmailService() {
+        this.restClient = RestClient.builder()
+                .baseUrl("https://api.brevo.com/v3")
+                .defaultHeader("Accept", "application/json")
+                .build();
+    }
+
     @Retryable(
             retryFor = { Exception.class },
             maxAttempts = 3,
-            backoff = @Backoff(delay = 2000, multiplier = 2) // 2sn, 4sn, 8sn
+            backoff = @Backoff(delay = 2000, multiplier = 2)
     )
     public void sendVerificationEmail(String to, String token) {
         String link = baseUrl + "/api/auth/verify-email?token=" + token;
@@ -102,48 +106,6 @@ public class EmailService {
         sendEmail(to, "BursIO - Burs Talebiniz Kabul Edildi", body);
     }
 
-    @Recover
-    public void recover(Exception e, String to, String subject, String htmlBody) {
-        log.error("Email gönderilemedi (3 deneme tükendi): {} | Hata: {}", to, e.getMessage());
-        throw new EmailSendException(ErrorMessages.EMAIL_SEND_FAILED);
-    }
-
-    @Retryable(
-            retryFor = { Exception.class },
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 2000, multiplier = 2)
-    )
-    private void sendEmail(String to, String subject, String htmlBody) {
-        ApiClient client = Configuration.getDefaultApiClient();
-        ApiKeyAuth apiKeyAuth = (ApiKeyAuth) client.getAuthentication("api-key");
-        apiKeyAuth.setApiKey(apiKey);
-
-        TransactionalEmailsApi api = new TransactionalEmailsApi(client);
-
-        SendSmtpEmailSender sender = new SendSmtpEmailSender();
-
-        sender.setEmail(fromEmail);
-        sender.setName(fromName);
-
-        SendSmtpEmailTo recipient = new SendSmtpEmailTo();
-        recipient.setEmail(to);
-
-
-        SendSmtpEmail email = new SendSmtpEmail();
-        email.setSender(sender);
-        email.setTo(List.of(recipient));
-        email.setSubject(subject);
-        email.setHtmlContent(htmlBody);
-
-        try {
-            api.sendTransacEmail(email);
-            log.info("Email gönderildi: {} | Subject: {}", to, subject);
-        } catch (ApiException e) {
-            log.warn("Email gönderimi başarısız, retry deneniyor: {} | Hata: {}", to, e.getMessage());
-            throw new RuntimeException("Email gönderilemedi: " + e.getMessage());
-        }
-    }
-
     @Retryable(
             retryFor = { Exception.class },
             maxAttempts = 3,
@@ -187,5 +149,35 @@ public class EmailService {
     @Recover
     public void recoverAccountDeleted(Exception e, String to, String message) {
         log.error("Hesap silme bildirimi gönderilemedi: {}", to);
+    }
+
+    @Recover
+    public void recover(Exception e, String to, String subject, String htmlBody) {
+        log.error("Email gönderilemedi (3 deneme tükendi): {} | Hata: {}", to, e.getMessage());
+        throw new EmailSendException(ErrorMessages.EMAIL_SEND_FAILED);
+    }
+
+    private void sendEmail(String to, String subject, String htmlBody) {
+        Map<String, Object> requestBody = Map.of(
+                "sender", Map.of("email", fromEmail, "name", fromName),
+                "to", List.of(Map.of("email", to)),
+                "subject", subject,
+                "htmlContent", htmlBody
+        );
+
+        try {
+            restClient.post()
+                    .uri("/smtp/email")
+                    .header("api-key", apiKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(requestBody)
+                    .retrieve()
+                    .toBodilessEntity();
+
+            log.info("Email gönderildi: {} | Subject: {}", to, subject);
+        } catch (Exception e) {
+            log.warn("Email gönderimi başarısız, retry deneniyor: {} | Hata: {}", to, e.getMessage());
+            throw new RuntimeException("Email gönderilemedi: " + e.getMessage());
+        }
     }
 }
