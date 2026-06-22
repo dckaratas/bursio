@@ -114,6 +114,7 @@ public class MatchService {
         return MatchResponse.from(match);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<MatchResponse> getDonorMatches(User donor, int page, int size) {
         return PageResponse.from(
                 matchRequestRepository
@@ -123,6 +124,7 @@ public class MatchService {
         );
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<MatchResponse> getStudentMatches(User student, int page, int size) {
         return PageResponse.from(
                 matchRequestRepository

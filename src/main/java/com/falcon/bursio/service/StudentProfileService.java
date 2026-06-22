@@ -46,6 +46,7 @@ public class StudentProfileService {
         return StudentProfileResponse.from(profile, false);
     }
 
+    @Transactional(readOnly = true)
     public StudentProfileResponse getMyProfile(User currentUser) {
         StudentProfile profile = studentProfileRepository
                 .findByUserId(currentUser.getId())

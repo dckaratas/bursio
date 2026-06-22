@@ -52,6 +52,7 @@ public class AdminService {
 
     // ── Rapor Yönetimi ───────────────────────────────────────────────────────
 
+    @Transactional(readOnly = true)
     public PageResponse<ReportDetailResponse> getReports(String query, ReportStatus status, int page, int size) {
         return PageResponse.from(
                 reportRepository.searchReports(
