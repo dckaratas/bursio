@@ -38,6 +38,11 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getAllUsers(query, role, page, size));
     }
 
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<AdminUserDetailResponse> getUserDetail(@PathVariable Long userId) {
+        return ResponseEntity.ok(adminService.getUserDetail(userId));
+    }
+
     @PutMapping("/users/{userId}/status")
     public ResponseEntity<UserSummaryResponse> updateUserStatus(
             @PathVariable Long userId,
@@ -68,9 +73,10 @@ public class AdminController {
     @GetMapping("/universities")
     public ResponseEntity<PageResponse<UniversityResponse>> getAllUniversities(
             @RequestParam(required = false) String query,
+            @RequestParam(required = false) Boolean active,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(universityService.getUniversities(query, page, size));
+        return ResponseEntity.ok(universityService.getUniversities(query, active, page, size));
     }
 
     @PostMapping("/universities")

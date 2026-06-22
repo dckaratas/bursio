@@ -103,10 +103,11 @@ public class UniversityService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<UniversityResponse> getUniversities(String query, int page, int size) {
+    public PageResponse<UniversityResponse> getUniversities(String query, Boolean active, int page, int size) {
         return PageResponse.from(
                 universityRepository.searchUniversities(
                                 query,
+                                active,
                                 PageRequest.of(page, size, Sort.by("name").ascending()))
                         .map(UniversityResponse::from)
         );

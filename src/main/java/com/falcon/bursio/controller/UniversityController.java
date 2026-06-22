@@ -22,7 +22,7 @@ public class UniversityController {
             @RequestParam(required = false) String query,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "100") int size) {
-        return ResponseEntity.ok(universityService.getUniversities(query, page, size));
+        return ResponseEntity.ok(universityService.getUniversities(query, true, page, size));
     }
 
     @GetMapping("/search")

@@ -3,6 +3,7 @@ package com.falcon.bursio.service;
 import com.falcon.bursio.common.ErrorMessages;
 import com.falcon.bursio.dto.request.AddEmailDomainRequest;
 import com.falcon.bursio.dto.request.AddUniversityRequest;
+import com.falcon.bursio.dto.response.PageResponse;
 import com.falcon.bursio.dto.response.UniversityResponse;
 import com.falcon.bursio.entity.University;
 import com.falcon.bursio.exception.ResourceNotFoundException;
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +25,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +47,72 @@ class UniversityServiceTest {
                 .emailDomains(new ArrayList<>(List.of("gazi.edu.tr")))
                 .active(true)
                 .build();
+    }
+
+    // ── getUniversities ──────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("Filtre olmadan tüm üniversiteler dönmeli (active=null)")
+    void getUniversities_no_filter_returns_all() {
+        University passive = University.builder()
+                .name("Pasif Üniversitesi")
+                .city("İzmir")
+                .emailDomains(new ArrayList<>(List.of("pasif.edu.tr")))
+                .active(false)
+                .build();
+
+        when(universityRepository.searchUniversities(isNull(), isNull(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(university, passive)));
+
+        PageResponse<UniversityResponse> result = universityService.getUniversities(null, null, 0, 20);
+
+        assertThat(result.content()).hasSize(2);
+        verify(universityRepository).searchUniversities(isNull(), isNull(), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("active=true filtresiyle yalnızca aktif üniversiteler dönmeli")
+    void getUniversities_active_filter_returns_only_active() {
+        when(universityRepository.searchUniversities(isNull(), eq(true), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(university)));
+
+        PageResponse<UniversityResponse> result = universityService.getUniversities(null, true, 0, 20);
+
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.content().getFirst().name()).isEqualTo("Gazi Üniversitesi");
+        verify(universityRepository).searchUniversities(isNull(), eq(true), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("active=false filtresiyle yalnızca pasif üniversiteler dönmeli")
+    void getUniversities_inactive_filter_returns_only_passive() {
+        University passive = University.builder()
+                .name("Pasif Üniversitesi")
+                .city("İzmir")
+                .emailDomains(new ArrayList<>(List.of("pasif.edu.tr")))
+                .active(false)
+                .build();
+
+        when(universityRepository.searchUniversities(isNull(), eq(false), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(passive)));
+
+        PageResponse<UniversityResponse> result = universityService.getUniversities(null, false, 0, 20);
+
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.content().getFirst().name()).isEqualTo("Pasif Üniversitesi");
+        verify(universityRepository).searchUniversities(isNull(), eq(false), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("Query ve active filtresi birlikte çalışmalı")
+    void getUniversities_query_and_active_filter_together() {
+        when(universityRepository.searchUniversities(eq("Gazi"), eq(true), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(university)));
+
+        PageResponse<UniversityResponse> result = universityService.getUniversities("Gazi", true, 0, 20);
+
+        assertThat(result.content()).hasSize(1);
+        verify(universityRepository).searchUniversities(eq("Gazi"), eq(true), any(Pageable.class));
     }
 
     // ── addUniversity ────────────────────────────────────────────────────────

@@ -27,9 +27,11 @@ public interface UniversityRepository extends JpaRepository<University, Long> {
                 WHERE (:query IS NULL OR :query = '' OR
                        LOWER(u.name) LIKE LOWER(CONCAT('%', :query, '%')) OR
                        LOWER(u.city) LIKE LOWER(CONCAT('%', :query, '%')))
+                AND (:active IS NULL OR u.active = :active)
             """)
     Page<University> searchUniversities(
             @Param("query") String query,
+            @Param("active") Boolean active,
             Pageable pageable
     );
 }
