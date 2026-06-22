@@ -17,6 +17,7 @@ public interface StudentProfileRepository extends JpaRepository<StudentProfile, 
     @Query("""
                 SELECT sp FROM StudentProfile sp
                 WHERE sp.profileComplete = true
+                AND sp.user.status = com.falcon.bursio.entity.enums.AccountStatus.ACTIVE
                 AND (:universityId IS NULL OR sp.university.id = :universityId)
                 AND (:departmentCategory IS NULL OR sp.departmentCategory = :departmentCategory)
                 AND (:minGpa IS NULL OR sp.gpa >= :minGpa)
