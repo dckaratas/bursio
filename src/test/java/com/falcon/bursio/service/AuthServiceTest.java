@@ -217,6 +217,99 @@ class AuthServiceTest {
                 .hasMessage(ErrorMessages.ACCOUNT_NOT_ACTIVE);
     }
 
+    @Test
+    @DisplayName("Öğrenci güncel emailVerifiedAt ile login başarılı olmalı")
+    void login_student_with_fresh_verification_success() {
+        User studentUser = User.builder()
+                .email("test@ogr.gazi.edu.tr")
+                .password("encodedPassword")
+                .role(Role.STUDENT)
+                .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
+                .emailVerifiedAt(LocalDateTime.now().minusMonths(6)) // 6 ay önce — geçerli
+                .build();
+
+        LoginRequest loginRequest = new LoginRequest("test@ogr.gazi.edu.tr", "password123");
+        when(userRepository.findByEmail(loginRequest.email())).thenReturn(Optional.of(studentUser));
+        when(passwordEncoder.matches(loginRequest.password(), studentUser.getPassword())).thenReturn(true);
+        when(jwtService.generateToken(studentUser)).thenReturn("jwt-token");
+
+        AuthResponse response = authService.login(loginRequest);
+
+        assertThat(response.token()).isEqualTo("jwt-token");
+        verify(emailService, never()).sendVerificationEmail(anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("emailVerifiedAt süresi dolmuş öğrenci login yapamamalı ve email gönderilmeli")
+    void login_student_with_expired_verification_throws_exception() {
+        User studentUser = User.builder()
+                .email("test@ogr.gazi.edu.tr")
+                .password("encodedPassword")
+                .role(Role.STUDENT)
+                .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
+                .emailVerifiedAt(LocalDateTime.now().minusMonths(13)) // 13 ay önce — süresi dolmuş
+                .build();
+
+        LoginRequest loginRequest = new LoginRequest("test@ogr.gazi.edu.tr", "password123");
+        when(userRepository.findByEmail(loginRequest.email())).thenReturn(Optional.of(studentUser));
+        when(passwordEncoder.matches(loginRequest.password(), studentUser.getPassword())).thenReturn(true);
+
+        assertThatThrownBy(() -> authService.login(loginRequest))
+                .isInstanceOf(EmailReverificationRequiredException.class)
+                .hasMessage(ErrorMessages.EMAIL_REVERIFICATION_REQUIRED);
+
+        verify(emailService).sendVerificationEmail(eq("test@ogr.gazi.edu.tr"), anyString());
+        verify(jwtService, never()).generateToken(any());
+    }
+
+    @Test
+    @DisplayName("emailVerifiedAt null olan öğrenci login yapamamalı ve email gönderilmeli")
+    void login_student_with_null_email_verified_at_throws_exception() {
+        User studentUser = User.builder()
+                .email("test@ogr.gazi.edu.tr")
+                .password("encodedPassword")
+                .role(Role.STUDENT)
+                .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
+                .emailVerifiedAt(null) // hiç set edilmemiş
+                .build();
+
+        LoginRequest loginRequest = new LoginRequest("test@ogr.gazi.edu.tr", "password123");
+        when(userRepository.findByEmail(loginRequest.email())).thenReturn(Optional.of(studentUser));
+        when(passwordEncoder.matches(loginRequest.password(), studentUser.getPassword())).thenReturn(true);
+
+        assertThatThrownBy(() -> authService.login(loginRequest))
+                .isInstanceOf(EmailReverificationRequiredException.class)
+                .hasMessage(ErrorMessages.EMAIL_REVERIFICATION_REQUIRED);
+
+        verify(jwtService, never()).generateToken(any());
+    }
+
+    @Test
+    @DisplayName("Cooldown içindeyken reverification emaili tekrar gönderilmemeli")
+    void login_student_expired_verification_in_cooldown_no_duplicate_email() {
+        User studentUser = User.builder()
+                .email("test@ogr.gazi.edu.tr")
+                .password("encodedPassword")
+                .role(Role.STUDENT)
+                .status(AccountStatus.ACTIVE)
+                .emailVerified(true)
+                .emailVerifiedAt(LocalDateTime.now().minusMonths(13))
+                .lastVerificationSentAt(LocalDateTime.now().minusMinutes(1)) // 1 dk önce gönderilmiş
+                .build();
+
+        LoginRequest loginRequest = new LoginRequest("test@ogr.gazi.edu.tr", "password123");
+        when(userRepository.findByEmail(loginRequest.email())).thenReturn(Optional.of(studentUser));
+        when(passwordEncoder.matches(loginRequest.password(), studentUser.getPassword())).thenReturn(true);
+
+        assertThatThrownBy(() -> authService.login(loginRequest))
+                .isInstanceOf(EmailReverificationRequiredException.class);
+
+        verify(emailService, never()).sendVerificationEmail(anyString(), anyString()); // cooldown — email gönderilmez
+    }
+
     // ── Email Doğrulama ──────────────────────────────────────────────────────────
 
     @Test
@@ -240,6 +333,7 @@ class AuthServiceTest {
         assertThat(pendingUser.isEmailVerified()).isTrue();
         assertThat(pendingUser.getStatus()).isEqualTo(AccountStatus.ACTIVE);
         assertThat(pendingUser.getVerificationToken()).isNull();
+        assertThat(pendingUser.getEmailVerifiedAt()).isNotNull(); // yıllık doğrulama için set edilmeli
         verify(userRepository).save(pendingUser);
     }
 

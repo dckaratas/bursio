@@ -56,4 +56,6 @@ public class User extends BaseEntity {
     private String passwordResetToken;
 
     private LocalDateTime passwordResetExpiry;
+
+    private LocalDateTime emailVerifiedAt;
 }

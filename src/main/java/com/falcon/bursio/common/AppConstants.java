@@ -17,4 +17,6 @@ public final class AppConstants {
 
     public static final long PASSWORD_RESET_TOKEN_EXPIRY_HOURS = 1;
     public static final long PASSWORD_RESET_COOLDOWN_MINUTES = 3;
+
+    public static final long EMAIL_REVERIFICATION_PERIOD_MONTHS = 12;
 }

@@ -144,9 +144,9 @@ class AdminServiceTest {
         when(reportRepository.findById(1L)).thenReturn(Optional.of(report));
         when(reportRepository.save(any(Report.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        ReportDetailResponse result = adminService.updateReportStatus(1L, ReportStatus.CLOSED);
+        ReportDetailResponse result = adminService.updateReportStatus(1L, ReportStatus.RESOLVED);
 
-        assertThat(result.reportStatus()).isEqualTo(ReportStatus.CLOSED);
+        assertThat(result.reportStatus()).isEqualTo(ReportStatus.RESOLVED);
         verify(reportRepository).save(report);
     }
 
@@ -155,7 +155,7 @@ class AdminServiceTest {
     void updateReportStatus_report_not_found_throws_exception() {
         when(reportRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> adminService.updateReportStatus(99L, ReportStatus.CLOSED))
+        assertThatThrownBy(() -> adminService.updateReportStatus(99L, ReportStatus.RESOLVED))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage(ErrorMessages.REPORT_NOT_FOUND);
 

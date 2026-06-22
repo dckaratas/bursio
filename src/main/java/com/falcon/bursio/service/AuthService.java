@@ -100,6 +100,7 @@ public class AuthService {
         user.setStatus(AccountStatus.ACTIVE);
         user.setVerificationToken(null);
         user.setTokenExpiry(null);
+        user.setEmailVerifiedAt(LocalDateTime.now());
         userRepository.save(user);
 
         return new MessageResponse(SuccessMessages.EMAIL_VERIFIED);
@@ -117,8 +118,42 @@ public class AuthService {
             throw new ResourceNotFoundException(ErrorMessages.ACCOUNT_NOT_ACTIVE);
         }
 
+        // Öğrenciler için yıllık yeniden doğrulama kontrolü
+        if (user.getRole() == Role.STUDENT) {
+            LocalDateTime cutoff = LocalDateTime.now()
+                    .minusMonths(AppConstants.EMAIL_REVERIFICATION_PERIOD_MONTHS);
+            if (user.getEmailVerifiedAt() == null || user.getEmailVerifiedAt().isBefore(cutoff)) {
+                sendReverificationEmail(user);
+                throw new EmailReverificationRequiredException(ErrorMessages.EMAIL_REVERIFICATION_REQUIRED);
+            }
+        }
+
         String token = jwtService.generateToken(user);
         return new AuthResponse(token, user.getEmail(), user.getRole().name());
+    }
+
+    @Transactional
+    protected void sendReverificationEmail(User user) {
+        // Cooldown kontrolü — son 3 dakikada email gönderildiyse tekrar gönderme
+        if (user.getLastVerificationSentAt() != null) {
+            LocalDateTime cooldownEnd = user.getLastVerificationSentAt()
+                    .plusMinutes(AppConstants.RESEND_VERIFICATION_COOLDOWN_MINUTES);
+            if (LocalDateTime.now().isBefore(cooldownEnd)) {
+                return; // Sessizce geç, exception fırlatma — login zaten hata dönecek
+            }
+        }
+
+        String newToken = UUID.randomUUID().toString();
+        user.setVerificationToken(newToken);
+        user.setTokenExpiry(LocalDateTime.now().plusHours(AppConstants.VERIFICATION_TOKEN_EXPIRY_HOURS));
+        user.setLastVerificationSentAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), newToken);
+        } catch (Exception e) {
+            log.warn("Yeniden doğrulama emaili gönderilemedi: {}", user.getEmail(), e);
+        }
     }
 
     private String extractDomain(String email) {
