@@ -38,6 +38,31 @@ public class RateLimitFilter extends OncePerRequestFilter {
             return;
         }
 
+        // Public endpointler → polling göz önünde bulundurularak IP bazlı cömert limit
+        if (path.startsWith("/api/public/")) {
+            String key = "public:ip:" + getClientIp(request);
+            Bucket bucket = buckets.computeIfAbsent(key, k -> newPublicBucket());
+            if (bucket.tryConsume(1)) {
+                filterChain.doFilter(request, response);
+            } else {
+                response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+                response.setContentType("application/json");
+                response.getWriter().write("""
+                        {
+                            "code": "TOO_MANY_REQUESTS",
+                            "message": "Çok fazla istek gönderildi. Lütfen biraz bekleyin."
+                        }
+                        """);
+            }
+            return;
+        }
+
+        // Admin kullanıcıları rate limit'ten muaf
+        if (isAdmin(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String key = resolveKey(request, path);
         Bucket bucket = resolveBucket(key, path);
 
@@ -57,7 +82,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private String resolveKey(HttpServletRequest request, String path) {
         // Auth endpointleri → IP bazlı
-        if (path.startsWith("/api/auth/")) {
+        if (path.startsWith("/api/auth/") || path.startsWith("/api/public/")) {
             return "ip:" + getClientIp(request);
         }
 
@@ -80,6 +105,17 @@ public class RateLimitFilter extends OncePerRequestFilter {
         return buckets.computeIfAbsent(key, k -> newBucket(path));
     }
 
+    private Bucket newPublicBucket() {
+        // Public polling endpointleri → IP başına dakikada 120 istek
+        // (~120 eşzamanlı kullanıcının aynı NAT'tan 60sn polling yapmasını karşılar)
+        return Bucket.builder()
+                .addLimit(Bandwidth.builder()
+                        .capacity(120)
+                        .refillIntervally(120, Duration.ofMinutes(1))
+                        .build())
+                .build();
+    }
+
     private Bucket newBucket(String path) {
         // Match random → saatte 5 istek
         if (path.equals("/api/matches/random")) {
@@ -91,30 +127,38 @@ public class RateLimitFilter extends OncePerRequestFilter {
                     .build();
         }
 
-        // Auth endpointleri → 10 dakikada 10 istek
+        // Auth endpointleri → 3 dakikada 10 istek
         if (path.startsWith("/api/auth/")) {
             return Bucket.builder()
                     .addLimit(Bandwidth.builder()
                             .capacity(10)
-                            .refillIntervally(10, Duration.ofMinutes(10))
+                            .refillIntervally(10, Duration.ofMinutes(3))
                             .build())
                     .build();
         }
 
-        // Genel endpointler → dakikada 60 istek
+        // Genel endpointler → dakikada 30 istek
         return Bucket.builder()
                 .addLimit(Bandwidth.builder()
                         .capacity(60)
-                        .refillIntervally(60, Duration.ofMinutes(1))
+                        .refillIntervally(30, Duration.ofMinutes(1))
                         .build())
                 .build();
     }
 
-    private String getClientIp(HttpServletRequest request) {
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isEmpty()) {
-            return forwarded.split(",")[0].trim();
+    private boolean isAdmin(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) return false;
+        try {
+            String token = authHeader.substring(7);
+            String role = jwtService.extractClaims(token).get("role", String.class);
+            return "ADMIN".equals(role);
+        } catch (Exception e) {
+            return false;
         }
+    }
+
+    private String getClientIp(HttpServletRequest request) {
         return request.getRemoteAddr();
     }
 }

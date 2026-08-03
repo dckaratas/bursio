@@ -7,6 +7,7 @@ import com.falcon.bursio.entity.StudentProfile;
 import com.falcon.bursio.entity.University;
 import com.falcon.bursio.entity.User;
 import com.falcon.bursio.entity.enums.ContactPreference;
+import com.falcon.bursio.entity.enums.DepartmentCategory;
 import com.falcon.bursio.entity.enums.Role;
 import com.falcon.bursio.exception.ResourceNotFoundException;
 import com.falcon.bursio.repository.StudentProfileRepository;
@@ -39,10 +40,13 @@ class StudentProfileServiceTest {
     private University university;
     private StudentProfileRequest profileRequest;
 
+    // Emailden çıkarılan domain — servis bunu kullanır
+    private static final String STUDENT_EMAIL_DOMAIN = "ogr.gazi.edu.tr";
+
     @BeforeEach
     void setUp() {
         student = User.builder()
-                .email("test@ogr.gazi.edu.tr")
+                .email("test@" + STUDENT_EMAIL_DOMAIN)
                 .firstName("Ali")
                 .lastName("Kaya")
                 .role(Role.STUDENT)
@@ -55,21 +59,25 @@ class StudentProfileServiceTest {
                 .build();
 
         profileRequest = new StudentProfileRequest(
-                1L,
                 "Bilgisayar Mühendisliği",
                 3,
                 new BigDecimal("3.20"),
                 "Kendim hakkında kısa bilgi.",
                 "Burs almak istiyorum çünkü...",
                 ContactPreference.EMAIL,
-                "test@gmail.com"
+                "test@gmail.com",
+                DepartmentCategory.DIGER
         );
     }
 
+    // ── createOrUpdate ───────────────────────────────────────────────────────
+
     @Test
-    @DisplayName("Profil ilk kez oluşturulabilmeli")
+    @DisplayName("Profil ilk kez oluşturulabilmeli, üniversite emailden belirlenmeli")
     void createOrUpdate_creates_new_profile() {
-        when(universityRepository.findById(1L)).thenReturn(Optional.of(university));
+        // Servis findByEmailDomain kullanır, findById değil
+        when(universityRepository.findByEmailDomain(STUDENT_EMAIL_DOMAIN))
+                .thenReturn(Optional.of(university));
         when(studentProfileRepository.findByUserId(any())).thenReturn(Optional.empty());
         when(studentProfileRepository.save(any(StudentProfile.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
@@ -78,9 +86,13 @@ class StudentProfileServiceTest {
 
         assertThat(response.department()).isEqualTo("Bilgisayar Mühendisliği");
         assertThat(response.universityName()).isEqualTo("Gazi Üniversitesi");
+        assertThat(response.city()).isEqualTo("Ankara");
         assertThat(response.profileComplete()).isTrue();
-        assertThat(response.contactValue()).isNull(); // eşleşme olmadan gizli
+        // createOrUpdate showContact=false ile dönüyor
+        assertThat(response.contactValue()).isNull();
         verify(studentProfileRepository).save(any(StudentProfile.class));
+        // findById asla çağrılmamalı
+        verify(universityRepository, never()).findById(any());
     }
 
     @Test
@@ -93,7 +105,8 @@ class StudentProfileServiceTest {
                 .profileComplete(true)
                 .build();
 
-        when(universityRepository.findById(1L)).thenReturn(Optional.of(university));
+        when(universityRepository.findByEmailDomain(STUDENT_EMAIL_DOMAIN))
+                .thenReturn(Optional.of(university));
         when(studentProfileRepository.findByUserId(any())).thenReturn(Optional.of(existingProfile));
         when(studentProfileRepository.save(any(StudentProfile.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
@@ -101,27 +114,39 @@ class StudentProfileServiceTest {
         StudentProfileResponse response = studentProfileService.createOrUpdate(student, profileRequest);
 
         assertThat(response.department()).isEqualTo("Bilgisayar Mühendisliği");
+        assertThat(response.universityName()).isEqualTo("Gazi Üniversitesi");
+        verify(studentProfileRepository).save(existingProfile);
+    }
+
+    @Test
+    @DisplayName("Email domaini bilinen bir üniversiteye ait değilse üniversite null bırakılmalı")
+    void createOrUpdate_unknown_domain_saves_profile_with_null_university() {
+        // Servis orElse(null) kullanıyor — exception fırlatmıyor
+        when(universityRepository.findByEmailDomain(STUDENT_EMAIL_DOMAIN))
+                .thenReturn(Optional.empty());
+        when(studentProfileRepository.findByUserId(any())).thenReturn(Optional.empty());
+        when(studentProfileRepository.save(any(StudentProfile.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
+
+        StudentProfileResponse response = studentProfileService.createOrUpdate(student, profileRequest);
+
+        assertThat(response.universityName()).isNull();
+        assertThat(response.universityId()).isNull();
+        assertThat(response.profileComplete()).isTrue();
         verify(studentProfileRepository).save(any(StudentProfile.class));
     }
 
-    @Test
-    @DisplayName("Geçersiz üniversite id ile profil oluşturulamamalı")
-    void createOrUpdate_with_invalid_university_throws_exception() {
-        when(universityRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> studentProfileService.createOrUpdate(student, profileRequest))
-                .isInstanceOf(ResourceNotFoundException.class);
-
-        verify(studentProfileRepository, never()).save(any());
-    }
+    // ── getMyProfile ─────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("Kendi profilini getirebilmeli")
-    void getMyProfile_success() {
+    @DisplayName("Kendi profilini görebilmeli, iletişim bilgisi görünür olmalı")
+    void getMyProfile_success_shows_contact() {
         StudentProfile profile = StudentProfile.builder()
                 .user(student)
                 .university(university)
                 .department("Bilgisayar Mühendisliği")
+                .contactPreference(ContactPreference.EMAIL)
+                .contactValue("test@gmail.com")
                 .profileComplete(true)
                 .build();
 
@@ -130,7 +155,8 @@ class StudentProfileServiceTest {
         StudentProfileResponse response = studentProfileService.getMyProfile(student);
 
         assertThat(response.department()).isEqualTo("Bilgisayar Mühendisliği");
-        assertThat(response.contactValue()).isNull();
+        // getMyProfile showContact=true ile çağrılır — kendi profilinde iletişim görünür
+        assertThat(response.contactValue()).isEqualTo("test@gmail.com");
     }
 
     @Test

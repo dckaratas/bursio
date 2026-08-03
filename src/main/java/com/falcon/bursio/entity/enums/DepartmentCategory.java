@@ -1,0 +1,20 @@
+package com.falcon.bursio.entity.enums;
+
+public enum DepartmentCategory {
+    MUHENDISLIK_TEKNOLOJI,
+    TIP_SAGLIK,
+    HUKUK,
+    IKTISADI_IDARI,
+    EGITIM,
+    FEN_BILIMLERI,
+    SOSYAL_BEŞERI,
+    GUZEL_SANATLAR_TASARIM,
+    MIMARLIK_SEHIR_PLANLAMA,
+    ILETISIM,
+    ZIRAAT_ORMAN,
+    DIS_HEKIMLIGI_ECZACILIK,
+    SPOR_BILIMLERI,
+    TURIZM_OTELCILIK,
+    ILAHIYAT,
+    DIGER
+}

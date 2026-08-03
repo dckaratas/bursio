@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -14,14 +15,15 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class Report extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reporter_id", nullable = false)
+    @JoinColumn(name = "reporter_id", nullable = true)
     private User reporter;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reported_user_id", nullable = false)
+    @JoinColumn(name = "reported_user_id", nullable = true)
     private User reportedUser;
 
     @Enumerated(EnumType.STRING)
@@ -33,4 +35,7 @@ public class Report extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "report_status")
     private ReportStatus reportStatus;
+
+    private String reporterEmail;
+    private String reportedUserEmail;
 }

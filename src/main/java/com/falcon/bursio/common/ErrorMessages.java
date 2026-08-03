@@ -32,6 +32,8 @@ public final class ErrorMessages {
     // User
     public static final String USER_NOT_FOUND = "Kullanıcı bulunamadı.";
     public static final String ACCOUNT_NOT_ACTIVE = "Hesabınız henüz aktif değil. Lütfen emailinizi doğrulayın.";
+    public static final String CANNOT_DELETE_ADMIN = "Admin hesabı silinemez.";
+    public static final String INVALID_PASSWORD = "Şifre hatalı.";
 
     // Student
     public static final String STUDENT_PROFILE_NOT_FOUND = "Öğrenci profili bulunamadı.";
@@ -42,6 +44,11 @@ public final class ErrorMessages {
     public static final String INVALID_MATCH_STATE = "Bu eşleşme talebi artık yanıtlanamaz.";
     public static final String DUPLICATE_MATCH = "Bu öğrenciye zaten bekleyen bir talebiniz var.";
 
+    // University
+    public static final String UNIVERSITY_NOT_FOUND = "Üniversite bulunamadı.";
+    public static final String DOMAIN_ALREADY_EXISTS = "Bu email domaini zaten başka bir üniversiteye kayıtlı.";
+    public static final String DOMAIN_ALREADY_IN_UNIVERSITY = "Bu email domaini zaten bu üniversiteye ekli.";
+
     // Report
     public static final String REPORT_NOT_FOUND = "Şikayet bulunamadı.";
     public static final String CANNOT_REPORT_YOURSELF = "Kendinizi şikayet edemezsiniz.";
@@ -49,4 +56,21 @@ public final class ErrorMessages {
     // General
     public static final String INTERNAL_ERROR = "Beklenmeyen bir hata oluştu.";
     public static final String ACCESS_DENIED = "Bu işlem için yetkiniz yok.";
+    public static final String MAINTENANCE_MODE = "Sistem şu anda bakım modundadır. Yeni kayıt geçici olarak kapatılmıştır.";
+
+    // Email
+    public static final String RESEND_COOLDOWN = "Yeni doğrulama emaili göndermek için 3 dakika beklemeniz gerekmektedir.";
+    public static final String ACCOUNT_ALREADY_VERIFIED = "Bu hesap zaten doğrulanmış.";
+    public static final String RESEND_MAX_REACHED = "Günlük doğrulama email limitine ulaşıldı. Lütfen yarın tekrar deneyin.";
+    public static final String EMAIL_CHANGE_NOT_ALLOWED = "Sadece doğrulanmamış hesaplarda email değişikliği yapılabilir.";
+    public static final String EMAIL_CHANGE_COOLDOWN = "Email değişikliği için 3 dakika beklemeniz gerekmektedir.";
+    public static final String EMAIL_SEND_FAILED = "Email servisi şu an kullanılamıyor. Lütfen birkaç dakika sonra tekrar deneyin.";
+    public static final String EMAIL_SEND_FAILED_VERIFICATION = "Doğrulama emaili gönderilemedi. Lütfen email adresinizi kontrol edip tekrar deneyin.";
+
+    public static final String EMAIL_REVERIFICATION_REQUIRED = "Hesabınızın yıllık email doğrulaması gerekiyor. Üniversite e-postanıza doğrulama linki gönderildi.";
+
+    // Password
+    public static final String INVALID_RESET_TOKEN = "Geçersiz veya süresi dolmuş şifre sıfırlama linki.";
+    public static final String PASSWORD_RESET_COOLDOWN = "Şifre sıfırlama emaili için 3 dakika beklemeniz gerekmektedir.";
+    public static final String SAME_PASSWORD = "Yeni şifre mevcut şifreyle aynı olamaz.";
 }

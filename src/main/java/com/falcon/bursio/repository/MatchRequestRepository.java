@@ -5,6 +5,7 @@ import com.falcon.bursio.entity.enums.MatchStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -22,6 +23,14 @@ public interface MatchRequestRepository extends JpaRepository<MatchRequest, Long
 
     boolean existsByDonorIdAndStudentIdAndStatus(Long donorId, Long studentId, MatchStatus status);
 
-    @Query("SELECT m FROM MatchRequest m WHERE m.status = 'PENDING' AND m.expiresAt < :now")
+    @Query("SELECT m FROM MatchRequest m WHERE m.status = com.falcon.bursio.entity.enums.MatchStatus.PENDING AND m.expiresAt < :now")
     List<MatchRequest> findExpiredMatches(@Param("now") LocalDateTime now);
+
+    @Query("SELECT m FROM MatchRequest m WHERE " +
+            "(m.donor.id = :userId OR m.student.id = :userId) AND m.status = com.falcon.bursio.entity.enums.MatchStatus.PENDING")
+    List<MatchRequest> findPendingMatchesByUserId(@Param("userId") Long userId);
+
+    @Modifying
+    @Query("DELETE FROM MatchRequest m WHERE m.donor.id = :userId OR m.student.id = :userId")
+    void deleteByUserId(@Param("userId") Long userId);
 }

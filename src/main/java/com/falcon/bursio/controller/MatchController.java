@@ -24,7 +24,7 @@ public class MatchController {
     @PostMapping("/random")
     @PreAuthorize("hasRole('DONOR')")
     public ResponseEntity<MatchResponse> createRandomMatch(
-            @RequestBody MatchFilterRequest request) {
+            @Valid @RequestBody MatchFilterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(matchService.createRandomMatch(SecurityUtils.getCurrentUser(), request));
     }

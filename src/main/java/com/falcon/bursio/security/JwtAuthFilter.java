@@ -1,11 +1,12 @@
 package com.falcon.bursio.security;
 
+import com.falcon.bursio.entity.enums.AccountStatus;
 import com.falcon.bursio.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,7 +17,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -45,15 +46,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         Long userId = jwtService.extractUserId(token);
         String role = jwtService.extractClaims(token).get("role", String.class);
 
-        userRepository.findById(userId).ifPresent(user -> {
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(
-                            user,
-                            null,
-                            List.of(new SimpleGrantedAuthority("ROLE_" + role))
-                    );
-            SecurityContextHolder.getContext().setAuthentication(auth);
-        });
+        userRepository.findById(userId)
+                .filter(user -> user.getStatus() == AccountStatus.ACTIVE)
+                .ifPresent(user -> {
+                    UsernamePasswordAuthenticationToken auth =
+                            new UsernamePasswordAuthenticationToken(
+                                    user,
+                                    null,
+                                    List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                            );
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                });
 
         filterChain.doFilter(request, response);
     }

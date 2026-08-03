@@ -1,15 +1,18 @@
 package com.falcon.bursio.controller;
 
-import com.falcon.bursio.dto.request.LoginRequest;
-import com.falcon.bursio.dto.request.RegisterRequest;
+import com.falcon.bursio.dto.request.*;
 import com.falcon.bursio.dto.response.AuthResponse;
 import com.falcon.bursio.dto.response.MessageResponse;
 import com.falcon.bursio.service.AuthService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -17,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     @PostMapping("/register")
     public ResponseEntity<MessageResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -24,12 +29,40 @@ public class AuthController {
     }
 
     @GetMapping("/verify-email")
-    public ResponseEntity<MessageResponse> verifyEmail(@RequestParam String token) {
-        return ResponseEntity.ok(authService.verifyEmail(token));
+    public void verifyEmail(@RequestParam String token, HttpServletResponse response) throws IOException {
+        try {
+            authService.verifyEmail(token);
+            response.sendRedirect(frontendUrl + "/verify-email/success");
+        } catch (Exception e) {
+            response.sendRedirect(frontendUrl + "/verify-email/error");
+        }
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<MessageResponse> resendVerification(@RequestParam String email) {
+        return ResponseEntity.ok(authService.resendVerificationEmail(email));
+    }
+
+    @PutMapping("/change-email")
+    public ResponseEntity<MessageResponse> changeEmail(
+            @Valid @RequestBody ChangeEmailRequest request) {
+        return ResponseEntity.ok(authService.changeEmail(request));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<MessageResponse> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(authService.forgotPassword(request));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<MessageResponse> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+        return ResponseEntity.ok(authService.resetPassword(request));
     }
 }

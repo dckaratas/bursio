@@ -9,7 +9,6 @@ CREATE TABLE users
     status             VARCHAR(30)  NOT NULL DEFAULT 'PENDING_VERIFICATION',
     first_name         VARCHAR(100),
     last_name          VARCHAR(100),
-    phone              VARCHAR(20),
     email_verified     BOOLEAN      NOT NULL DEFAULT FALSE,
     verification_token VARCHAR(255),
     token_expiry       TIMESTAMP,
@@ -46,7 +45,6 @@ CREATE TABLE student_profiles
     motivation         TEXT,
     contact_preference VARCHAR(20),
     contact_value      VARCHAR(255),
-    contact_visible    BOOLEAN   NOT NULL DEFAULT FALSE,
     profile_complete   BOOLEAN   NOT NULL DEFAULT FALSE,
     created_at         TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at         TIMESTAMP NOT NULL DEFAULT NOW()

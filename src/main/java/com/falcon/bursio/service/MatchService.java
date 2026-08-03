@@ -34,9 +34,14 @@ public class MatchService {
     @Transactional
     public MatchResponse createRandomMatch(User donor, MatchFilterRequest filter) {
 
+        if (filter.minGrade() != null && filter.maxGrade() != null
+                && filter.minGrade() > filter.maxGrade()) {
+            throw new IllegalArgumentException("Minimum sınıf, maksimum sınıftan büyük olamaz.");
+        }
+
         List<StudentProfile> candidates = studentProfileRepository.findByFilters(
                 filter.universityId(),
-                filter.department(),
+                filter.departmentCategory(),
                 filter.minGpa(),
                 filter.minGrade(),
                 filter.maxGrade(),
@@ -109,6 +114,7 @@ public class MatchService {
         return MatchResponse.from(match);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<MatchResponse> getDonorMatches(User donor, int page, int size) {
         return PageResponse.from(
                 matchRequestRepository
@@ -118,6 +124,7 @@ public class MatchService {
         );
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<MatchResponse> getStudentMatches(User student, int page, int size) {
         return PageResponse.from(
                 matchRequestRepository

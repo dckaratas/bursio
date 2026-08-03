@@ -1,5 +1,5 @@
 package com.falcon.bursio.entity.enums;
 
 public enum Role {
-    STUDENT, DONOR
+    STUDENT, DONOR, ADMIN
 }

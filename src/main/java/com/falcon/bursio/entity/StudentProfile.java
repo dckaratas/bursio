@@ -1,11 +1,9 @@
 package com.falcon.bursio.entity;
 
 import com.falcon.bursio.entity.enums.ContactPreference;
+import com.falcon.bursio.entity.enums.DepartmentCategory;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -15,6 +13,8 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "user")
+@EqualsAndHashCode(callSuper = true)
 public class StudentProfile extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -41,8 +41,8 @@ public class StudentProfile extends BaseEntity {
     private String contactValue;
 
     @Column(nullable = false)
-    private boolean contactVisible = false;
-
-    @Column(nullable = false)
     private boolean profileComplete = false;
+
+    @Enumerated(EnumType.STRING)
+    private DepartmentCategory departmentCategory;
 }

@@ -3,10 +3,7 @@ package com.falcon.bursio.entity;
 import com.falcon.bursio.entity.enums.AccountStatus;
 import com.falcon.bursio.entity.enums.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +13,8 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "studentProfile")
+@EqualsAndHashCode(callSuper = true)
 public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true)
@@ -34,7 +33,6 @@ public class User extends BaseEntity {
 
     private String firstName;
     private String lastName;
-    private String phone;
 
     @Column(nullable = false)
     private boolean emailVerified = false;
@@ -44,4 +42,20 @@ public class User extends BaseEntity {
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private StudentProfile studentProfile;
+
+    @Column(nullable = false)
+    private boolean privacyPolicyAccepted = false;
+
+    @Column(nullable = false)
+    private boolean termsAccepted = false;
+
+    private LocalDateTime consentAcceptedAt;
+
+    private LocalDateTime lastVerificationSentAt;
+
+    private String passwordResetToken;
+
+    private LocalDateTime passwordResetExpiry;
+
+    private LocalDateTime emailVerifiedAt;
 }

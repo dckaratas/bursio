@@ -34,6 +34,8 @@ public class ReportService {
         Report report = Report.builder()
                 .reporter(reporter)
                 .reportedUser(reportedUser)
+                .reporterEmail(reporter.getEmail())
+                .reportedUserEmail(reportedUser.getEmail())
                 .reason(request.reason())
                 .description(request.description())
                 .reportStatus(ReportStatus.OPEN)
